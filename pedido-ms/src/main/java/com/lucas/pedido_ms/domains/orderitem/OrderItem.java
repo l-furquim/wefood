@@ -1,5 +1,6 @@
-package com.lucas.pedido_ms.domains;
+package com.lucas.pedido_ms.domains.orderitem;
 
+import com.lucas.pedido_ms.domains.order.Order;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -18,10 +19,11 @@ public class OrderItem {
 
     private Long quantity;
 
-    @Column(name = "order_id")
-    private Long orderId;
-
     private BigDecimal price;
+
+    @ManyToOne
+    private Order order;
+
 
     public OrderItem(){
 
@@ -62,19 +64,19 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
-
     public BigDecimal getPrice() {
         return price;
     }
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
     }
 }

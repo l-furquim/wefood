@@ -1,4 +1,4 @@
-package com.lucas.pedido_ms.domains.enums;
+package com.lucas.pedido_ms.domains.order.enums;
 
 public enum OrderStatus {
     PREPARING(1),

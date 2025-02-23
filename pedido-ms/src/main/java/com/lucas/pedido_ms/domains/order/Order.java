@@ -1,11 +1,14 @@
-package com.lucas.pedido_ms.domains;
+package com.lucas.pedido_ms.domains.order;
 
-import com.lucas.pedido_ms.domains.enums.OrderStatus;
+import com.lucas.pedido_ms.domains.order.enums.OrderStatus;
+import com.lucas.pedido_ms.domains.orderitem.OrderItem;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Table(name = "products")
 @Entity
@@ -24,19 +27,25 @@ public class Order {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    private Long items;
+    @Column(name = "order_items")
+    private Long orderItems;
 
     private OrderStatus status;
+
+    @OneToMany(cascade=CascadeType.PERSIST, mappedBy="order")
+    private List<OrderItem> items = new ArrayList<>();
+
 
     public Order(){
 
     }
 
-    public Order(BigDecimal total, String userId, Long items, OrderStatus status) {
+    public Order(BigDecimal total, String userId, Long orderItems, OrderStatus status, List<OrderItem> items) {
         this.total = total;
         this.userId = userId;
-        this.items = items;
+        this.orderItems = orderItems;
         this.status = status;
+        this.items = items;
     }
 
     public void setTotal(BigDecimal total) {
@@ -51,20 +60,20 @@ public class Order {
         this.createdAt = createdAt;
     }
 
-    public void setItems(Long items) {
-        this.items = items;
+    public void setItems(Long orderItems) {
+        this.orderItems = orderItems;
     }
 
     public void setStatus(OrderStatus status) {
         this.status = status;
     }
 
-    public void removeItem(int item){
-        this.items -= item;
+    public void removeItem(int orderItems){
+        this.orderItems -= orderItems;
     }
 
-    public void addItem(int item){
-        this.items += item;
+    public void addItem(int orderItems){
+        this.orderItems += orderItems;
     }
 
     public Long getId() {
@@ -84,10 +93,17 @@ public class Order {
     }
 
     public Long getItems() {
-        return items;
+        return orderItems;
     }
 
     public OrderStatus getStatus() {
         return status;
+    }
+
+    public void addItem(OrderItem item){
+        this.items.add(item);
+    }
+    public void removeItem(OrderItem item){
+        this.items.remove(item);
     }
 }

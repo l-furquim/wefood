@@ -1,4 +1,4 @@
-package com.lucas.pedido_ms.domains;
+package com.lucas.pedido_ms.domains.address;
 
 
 import jakarta.persistence.*;
@@ -19,18 +19,19 @@ public class Address {
 
     private String zip;
 
-    private String user;
+    @Column(name = "user_id")
+    private String userId;
 
     public Address(){
 
     }
 
-    public Address(String street, String number, String state, String zip, String user) {
+    public Address(String street, String number, String state, String zip, String userId) {
         this.street = street;
         this.number = number;
         this.state = state;
         this.zip = zip;
-        this.user = user;
+        this.userId = userId;
     }
 
     public Long getId() {
@@ -70,11 +71,11 @@ public class Address {
     }
 
     public String getUser() {
-        return user;
+        return userId;
     }
 
     public void setUser(String user) {
-        this.user = user;
+        this.userId = user;
     }
 }
 

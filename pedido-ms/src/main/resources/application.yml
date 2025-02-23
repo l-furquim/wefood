@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: pedido-ms
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wefood
+    username: root
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
