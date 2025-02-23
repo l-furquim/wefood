@@ -28,24 +28,27 @@ public class Order {
     private LocalDateTime createdAt;
 
     @Column(name = "order_items")
-    private Long orderItems;
+    private int orderItems;
 
     private OrderStatus status;
 
     @OneToMany(cascade=CascadeType.PERSIST, mappedBy="order")
     private List<OrderItem> items = new ArrayList<>();
 
+    private String address;
+
 
     public Order(){
 
     }
 
-    public Order(BigDecimal total, String userId, Long orderItems, OrderStatus status, List<OrderItem> items) {
+    public Order(BigDecimal total, String userId, int orderItems, OrderStatus status, List<OrderItem> items, String address) {
         this.total = total;
         this.userId = userId;
         this.orderItems = orderItems;
         this.status = status;
         this.items = items;
+        this.address = address;
     }
 
     public void setTotal(BigDecimal total) {
@@ -60,7 +63,7 @@ public class Order {
         this.createdAt = createdAt;
     }
 
-    public void setItems(Long orderItems) {
+    public void setItems(int orderItems) {
         this.orderItems = orderItems;
     }
 
@@ -92,7 +95,7 @@ public class Order {
         return createdAt;
     }
 
-    public Long getItems() {
+    public int getItems() {
         return orderItems;
     }
 
@@ -105,5 +108,13 @@ public class Order {
     }
     public void removeItem(OrderItem item){
         this.items.remove(item);
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
