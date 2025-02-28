@@ -28,13 +28,13 @@ public class OrderItemService {
     }
 
     public OrderItem create(CreateOrderItemDto data){
-        if(data.title().isBlank() || data.description().isEmpty() ||
+        if(data.title() == null || data.title().isEmpty() || data.description() == null || data.description().isEmpty() ||
             data.price().compareTo(BigDecimal.ZERO) < 0 || data.quantity() <= 0){
             throw new InvalidOrderCreationException();
         }
 
         var orderItem = new OrderItem(
-            data.title(),
+                data.title(),
                 data.description(),
                 data.quantity(),
                 data.price()
@@ -47,7 +47,7 @@ public class OrderItemService {
             orderItem.setOrder(data.order());
         }
 
-        return orderItem;
+        return orderItemRepository.save(orderItem);
     }
 
     @Transactional

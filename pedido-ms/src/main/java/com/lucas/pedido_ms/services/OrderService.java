@@ -26,7 +26,7 @@ public class OrderService {
     }
 
     public Order create(CreateOrderDto data){
-        if(data.userId() == null || data.items() == null){
+        if(data.userId() == null || data.userId().isEmpty() || data.items() == null){
             throw new InvalidOrderCreationException();
         }
 

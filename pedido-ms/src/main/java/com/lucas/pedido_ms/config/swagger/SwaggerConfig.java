@@ -15,7 +15,7 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
-    private String url = "http://localhost:8080/swagger-ui.html";
+    private String url = "http://localhost:8080/";
 
     @Bean
     public OpenAPI openApi(){
