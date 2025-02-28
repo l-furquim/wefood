@@ -9,6 +9,8 @@ import com.lucas.pedido_ms.domains.orderitem.dto.UpdateOrderItemDto;
 import com.lucas.pedido_ms.domains.orderitem.exception.InvalidOrderItemDataException;
 import com.lucas.pedido_ms.domains.orderitem.exception.OrderItemNotFoundException;
 import com.lucas.pedido_ms.repositories.OrderItemRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import java.util.List;
 @Service
 public class OrderItemService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderItemService.class);
     private final OrderItemRepository orderItemRepository;
 
     public OrderItemService(OrderItemRepository orderItemRepository) {
@@ -58,6 +61,9 @@ public class OrderItemService {
         if(orderItem.isEmpty()){
             throw new OrderItemNotFoundException("Order not found");
         }
+
+
+
 
         if(data.title() != null) orderItem.get().setTitle(data.title());
         if(data.description() != null) orderItem.get().setDescription(data.description());
