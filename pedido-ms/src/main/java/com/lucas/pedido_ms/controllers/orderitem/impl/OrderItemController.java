@@ -1,6 +1,6 @@
-package com.lucas.pedido_ms.controller.orderitem.impl;
+package com.lucas.pedido_ms.controllers.orderitem.impl;
 
-import com.lucas.pedido_ms.controller.orderitem.IOrderItemController;
+import com.lucas.pedido_ms.controllers.orderitem.IOrderItemController;
 import com.lucas.pedido_ms.domains.orderitem.OrderItem;
 import com.lucas.pedido_ms.domains.orderitem.dto.CreateOrderItemDto;
 import com.lucas.pedido_ms.domains.orderitem.dto.DeleteOrderItemDto;

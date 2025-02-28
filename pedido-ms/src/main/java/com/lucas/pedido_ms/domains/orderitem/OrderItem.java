@@ -1,6 +1,7 @@
 package com.lucas.pedido_ms.domains.orderitem;
 
 import com.lucas.pedido_ms.domains.order.Order;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ public class OrderItem {
 
     private BigDecimal price;
 
+    @Nullable
     @ManyToOne
     private Order order;
 

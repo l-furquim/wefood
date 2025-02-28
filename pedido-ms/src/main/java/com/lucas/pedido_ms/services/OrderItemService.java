@@ -1,9 +1,7 @@
 package com.lucas.pedido_ms.services;
 
-
 import com.lucas.pedido_ms.domains.orderitem.OrderItem;
 import com.lucas.pedido_ms.domains.orderitem.dto.CreateOrderItemDto;
-import com.lucas.pedido_ms.domains.order.exception.InvalidOrderCreationException;
 import com.lucas.pedido_ms.domains.orderitem.dto.DeleteOrderItemDto;
 import com.lucas.pedido_ms.domains.orderitem.dto.UpdateOrderItemDto;
 import com.lucas.pedido_ms.domains.orderitem.exception.InvalidOrderItemDataException;
@@ -22,15 +20,17 @@ public class OrderItemService {
 
     private static final Logger log = LoggerFactory.getLogger(OrderItemService.class);
     private final OrderItemRepository orderItemRepository;
+    private final OrderService orderService;
 
-    public OrderItemService(OrderItemRepository orderItemRepository) {
+    public OrderItemService(OrderItemRepository orderItemRepository, OrderService orderService) {
         this.orderItemRepository = orderItemRepository;
+        this.orderService = orderService;
     }
 
     public OrderItem create(CreateOrderItemDto data){
         if(data.title() == null || data.title().isEmpty() || data.description() == null || data.description().isEmpty() ||
-            data.price().compareTo(BigDecimal.ZERO) < 0 || data.quantity() <= 0){
-            throw new InvalidOrderCreationException();
+            data.price().compareTo(BigDecimal.ZERO) < 0 || data.quantity() <= 0 || data.userId() == null || data.userId().isEmpty()){
+            throw new InvalidOrderItemDataException("Error creating the order item: invalid data");
         }
 
         var orderItem = new OrderItem(
@@ -40,12 +40,14 @@ public class OrderItemService {
                 data.price()
         );
 
-        if(data.order() != null){
-            if(!data.order().getUserId().equals(data.userId())){
-                throw new InvalidOrderCreationException();
-            }
-            orderItem.setOrder(data.order());
-        }
+//        if(data.orderId() != null){
+//            var order = orderService.findById(data.orderId());
+//            if(order.getUserId().equals(data.userId())){
+//                throw new InvalidOrderItemDataException("Error creating the order item: cannot create a order that doesn't contains the user id");
+//            }
+//
+//            orderItem.setOrder(order);
+//        }
 
         return orderItemRepository.save(orderItem);
     }
@@ -61,9 +63,6 @@ public class OrderItemService {
         if(orderItem.isEmpty()){
             throw new OrderItemNotFoundException("Order not found");
         }
-
-
-
 
         if(data.title() != null) orderItem.get().setTitle(data.title());
         if(data.description() != null) orderItem.get().setDescription(data.description());
@@ -86,5 +85,9 @@ public class OrderItemService {
 
     public List<OrderItem> get(){
         return orderItemRepository.findAll();
+    }
+
+    public OrderItem findById(Long id){
+        return orderItemRepository.findById(id).orElseThrow(() -> new OrderItemNotFoundException("Cannot found the order item by id"));
     }
 }

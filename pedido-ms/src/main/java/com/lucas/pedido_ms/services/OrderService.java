@@ -9,6 +9,8 @@ import com.lucas.pedido_ms.domains.order.enums.OrderStatus;
 import com.lucas.pedido_ms.domains.order.exception.InvalidOrderCreationException;
 import com.lucas.pedido_ms.domains.order.exception.InvalidOrderUpdateException;
 import com.lucas.pedido_ms.domains.order.exception.OrderNotFoundException;
+import com.lucas.pedido_ms.domains.orderitem.exception.OrderItemNotFoundException;
+import com.lucas.pedido_ms.repositories.OrderItemRepository;
 import com.lucas.pedido_ms.repositories.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,21 +22,28 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
 
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
         this.orderRepository = orderRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     public Order create(CreateOrderDto data){
         if(data.userId() == null || data.userId().isEmpty() || data.items() == null){
-            throw new InvalidOrderCreationException();
+            throw new InvalidOrderCreationException("Error creating the order: invalid data");
         }
 
-        var totalPrice = BigDecimal.ZERO;
+        var totalPrice = data.items().stream()
+                .map(item ->item.price())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        data.items().forEach(
-                item -> totalPrice.add(item.getPrice())
-        );
+
+        var orderItems = data.items().
+                stream()
+                .map(item -> orderItemRepository.findById(item.id())
+                        .orElseThrow(() -> new OrderItemNotFoundException("Cannot found the order item for the order creation")))
+                .toList();
 
         var addressFormated = formatAddress(data.address());
 
@@ -43,12 +52,12 @@ public class OrderService {
                 data.userId(),
                 data.items().size(),
                 OrderStatus.PREPARING,
-                data.items(),
+                orderItems,
                 addressFormated
         );
-        orderRepository.save(order);
 
-        return order;
+
+        return orderRepository.save(order);
     }
 
     @Transactional
@@ -85,6 +94,15 @@ public class OrderService {
     private String formatAddress(AddressDto address){
         return "%s, %s - %s/%s".
                 formatted(address.street(), address.number(), address.zip(), address.state());
+    }
+    public Order findById(Long id){
+        var order  = orderRepository.findById(id);
+
+        if(order.isEmpty()){
+            throw new OrderNotFoundException("Cannot find the order by id: "+ id);
+        }
+
+        return order.get();
     }
 
 }

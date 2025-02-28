@@ -1,4 +1,4 @@
-package com.lucas.pedido_ms.controller.orderitem;
+package com.lucas.pedido_ms.controllers.orderitem;
 
 import com.lucas.pedido_ms.domains.orderitem.OrderItem;
 import com.lucas.pedido_ms.domains.orderitem.dto.CreateOrderItemDto;
