@@ -1,9 +1,10 @@
 package com.lucas.pedido_ms.domains.order.enums;
 
 public enum OrderStatus {
-    PREPARING(1),
-    SHIPPING(2),
-    RECEIVED(3);
+    WAITING_PAYMENT(1),
+    PREPARING(2),
+    SHIPPING(3),
+    RECEIVED(4);
 
     private int value;
 

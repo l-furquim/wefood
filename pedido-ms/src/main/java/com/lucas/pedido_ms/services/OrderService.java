@@ -1,10 +1,7 @@
 package com.lucas.pedido_ms.services;
 
 import com.lucas.pedido_ms.domains.order.Order;
-import com.lucas.pedido_ms.domains.order.dto.AddressDto;
-import com.lucas.pedido_ms.domains.order.dto.CreateOrderDto;
-import com.lucas.pedido_ms.domains.order.dto.DeleteOrderDto;
-import com.lucas.pedido_ms.domains.order.dto.UpdateOrderDto;
+import com.lucas.pedido_ms.domains.order.dto.*;
 import com.lucas.pedido_ms.domains.order.enums.OrderStatus;
 import com.lucas.pedido_ms.domains.order.exception.InvalidOrderCreationException;
 import com.lucas.pedido_ms.domains.order.exception.InvalidOrderUpdateException;
@@ -12,6 +9,9 @@ import com.lucas.pedido_ms.domains.order.exception.OrderNotFoundException;
 import com.lucas.pedido_ms.domains.orderitem.exception.OrderItemNotFoundException;
 import com.lucas.pedido_ms.repositories.OrderItemRepository;
 import com.lucas.pedido_ms.repositories.OrderRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,12 +21,18 @@ import java.util.List;
 @Service
 public class OrderService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final String TOPIC = "wefood-payment-request";
 
-    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
+
+
+    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public Order create(CreateOrderDto data){
@@ -50,19 +56,18 @@ public class OrderService {
         var order = new Order(
                 totalPrice,
                 data.userId(),
-                data.items().size(),
-                OrderStatus.PREPARING,
+                OrderStatus.WAITING_PAYMENT,
                 orderItems,
                 addressFormated
         );
-
-
+        log.info("Producer: Enviando pedido de pagamento");
+        kafkaTemplate.send(TOPIC, )
         return orderRepository.save(order);
     }
 
     @Transactional
     public Order update(UpdateOrderDto data){
-        if(data.address() == null || data.id() == null){
+        if(data.id() == null){
             throw new InvalidOrderUpdateException("Invalid data for updating the order");
         }
         var order = orderRepository.findById(data.id());
@@ -71,10 +76,18 @@ public class OrderService {
             throw new OrderNotFoundException("Order cannot be found");
         }
 
-        order.get().setAddress(formatAddress(data.address()));
+        if(!order.get().getStatus().equals(OrderStatus.WAITING_PAYMENT)){
+            throw new InvalidOrderUpdateException("Cannot update a order that is alredy been prepared");
+        }
+
+        if(data.address() != null){
+            order.get().setAddress(formatAddress(data.address()));
+        }
+
+        updateOrderItems(order.get(), data.items(), data.remove());
+
 
         orderRepository.save(order.get());
-
 
         return order.get();
     }
@@ -95,6 +108,7 @@ public class OrderService {
         return "%s, %s - %s/%s".
                 formatted(address.street(), address.number(), address.zip(), address.state());
     }
+
     public Order findById(Long id){
         var order  = orderRepository.findById(id);
 
@@ -105,4 +119,31 @@ public class OrderService {
         return order.get();
     }
 
+    private void updateOrderItems(Order order, List<OrderOrderItemDto> items, boolean remove){
+        items.forEach(
+                o -> {
+                    var item = orderItemRepository.findById(o.id())
+                            .orElseThrow(() -> new OrderItemNotFoundException("Cannot found the order item for update"));
+
+                    if (remove) {
+                        order.removeItem(item, o.quantity());
+                    } else {
+                        order.addItem(item,o.quantity());
+                    }
+                    order.calculatePrice(item.getPrice(),o.quantity());
+                }
+        );
+    }
+
+    @Transactional
+    public void updateOrderStatus(OrderStatus status,Long orderId){
+        var order = orderRepository.findById(orderId);
+
+        if(order.isEmpty()){
+            throw new OrderNotFoundException("Order not found while attempting to update the status " + orderId);
+        }
+        order.get().setStatus(status);
+
+        orderRepository.save(order.get());
+    }
 }

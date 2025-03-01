@@ -8,9 +8,10 @@ import org.springframework.data.annotation.CreatedDate;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-@Table(name = "products")
+@Table(name = "orders")
 @Entity
 public class Order {
 
@@ -32,7 +33,7 @@ public class Order {
 
     private OrderStatus status;
 
-    @OneToMany(cascade=CascadeType.PERSIST, mappedBy="order")
+    @OneToMany(cascade=CascadeType.PERSIST, mappedBy="order", fetch = FetchType.EAGER)
     private List<OrderItem> items = new ArrayList<>();
 
     private String address;
@@ -42,10 +43,10 @@ public class Order {
 
     }
 
-    public Order(BigDecimal total, String userId, int orderItems, OrderStatus status, List<OrderItem> items, String address) {
+    public Order(BigDecimal total, String userId, OrderStatus status, List<OrderItem> items, String address) {
         this.total = total;
         this.userId = userId;
-        this.orderItems = orderItems;
+        this.orderItems = items.size();
         this.status = status;
         this.items = items;
         this.address = address;
@@ -103,11 +104,13 @@ public class Order {
         return status;
     }
 
-    public void addItem(OrderItem item){
+    public void addItem(OrderItem item, Long newQuantity){
         this.items.add(item);
+        this.orderItems += newQuantity;
     }
-    public void removeItem(OrderItem item){
+    public void removeItem(OrderItem item, Long newQuantity){
         this.items.remove(item);
+        this.orderItems -= newQuantity;
     }
 
     public String getAddress() {
@@ -116,5 +119,11 @@ public class Order {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+    public void calculatePrice(BigDecimal newPrice,Long newQuantity){
+        this.total = this.total.add(
+                newPrice.multiply(
+                        BigDecimal.valueOf(newQuantity))
+        );
     }
 }
