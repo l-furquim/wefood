@@ -13,6 +13,11 @@ java {
 	}
 }
 
+bootJar {
+	archiveBaseName = 'pedido-ms'
+	version = '1.0.0'
+}
+
 repositories {
 	mavenCentral()
 }
