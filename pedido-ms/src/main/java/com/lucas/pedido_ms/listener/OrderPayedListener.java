@@ -1,36 +1,35 @@
 package com.lucas.pedido_ms.listener;
 
-import com.lucas.pedido_ms.domains.order.enums.OrderStatus;
+import com.lucas.pedido_ms.domains.order.dto.OrderPaymentConfirmedDto;
 import com.lucas.pedido_ms.services.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @EnableKafka
 public class OrderPayedListener {
 
-    private static final String TOPIC = "wefood-order-payed";
+    private static final String TOPIC = "transaction.response";
     private static final String GROUP_ID = "wefood";
     private static final Logger log = LoggerFactory.getLogger(OrderPayedListener.class);
 
-
-    private final OrderService orderService;
-
-    public OrderPayedListener(OrderService orderService) {
-        this.orderService = orderService;
-    }
+    @Autowired
+    private OrderService orderService;
 
     @KafkaListener(topics = TOPIC, groupId = GROUP_ID)
-    public void receiveConfirmation(Long id){
-        log.info("Consumer: id do pedido com pagamento confirmardo: {}",id);
+    public void receiveConfirmation(OrderPaymentConfirmedDto data){
+        log.info("Consumer: id do pedido com confirmação chegou: {}",data);
 
         try{
-            orderService.updateOrderStatus(OrderStatus.PREPARING, id);
+            orderService.updateOrderStatus(data);
         }catch (Exception e){
             log.error("Erro ao alterar o status do pedido {}",e.getMessage());
         }
+
+        log.info("Status do pedido alterado com sucesso.");
     }
 }

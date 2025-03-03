@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:13
+    container_name: wefood-postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: wefood
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: wefood-zookeeper

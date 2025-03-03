@@ -24,12 +24,13 @@ public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final String TOPIC = "wefood-payment-request";
+    private final KafkaTemplate<String, SendOrderPaymentRequestDto> kafkaTemplate;
+    private static final String TOPIC = "transaction.request";
+    private static final String ORIGIN_KEY = "wefood-key";
 
 
 
-    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, KafkaTemplate<String, SendOrderPaymentRequestDto> kafkaTemplate) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.kafkaTemplate = kafkaTemplate;
@@ -61,7 +62,13 @@ public class OrderService {
                 addressFormated
         );
         log.info("Producer: Enviando pedido de pagamento");
-        kafkaTemplate.send(TOPIC, )
+
+        kafkaTemplate.send(TOPIC, new SendOrderPaymentRequestDto(
+                order.getUserId(),
+                order.getTotal(),
+                ORIGIN_KEY
+        ));
+
         return orderRepository.save(order);
     }
 
@@ -136,13 +143,15 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateOrderStatus(OrderStatus status,Long orderId){
-        var order = orderRepository.findById(orderId);
+    public void updateOrderStatus(OrderPaymentConfirmedDto status){
+        var order = orderRepository.findById(status.orderId());
 
         if(order.isEmpty()){
-            throw new OrderNotFoundException("Order not found while attempting to update the status " + orderId);
+            throw new OrderNotFoundException("Order not found while attempting to update the status " + status.orderId());
         }
-        order.get().setStatus(status);
+        if(status.validPayment()){
+            order.get().setStatus(OrderStatus.PREPARING);
+        }
 
         orderRepository.save(order.get());
     }

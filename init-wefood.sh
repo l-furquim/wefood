@@ -1,8 +1,5 @@
 #!/bin/bash
 
-
 sudo docker start wefood-pedido-ms
-
-cd projects/wefood/
-
-idea .
+sudo docker start wefood-zookeeper
+sudo docker start wefood-kafka
