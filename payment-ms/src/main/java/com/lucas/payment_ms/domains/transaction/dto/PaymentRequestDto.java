@@ -4,11 +4,11 @@ import com.lucas.payment_ms.domains.transaction.enums.TransactionType;
 
 import java.math.BigDecimal;
 
-public record CreateTransactionDto(
-        BigDecimal value,
-        String payerKey,
-        String payeeKey,
+public record PaymentRequestDto(
+        BigDecimal price,
+        String userId,
+        String restaurantId,
         TransactionType type,
         Long orderId
-){
+) {
 }

@@ -26,7 +26,7 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final KafkaTemplate<String, SendOrderPaymentRequestDto> kafkaTemplate;
     private static final String TOPIC = "transaction.request";
-    private static final String ORIGIN_KEY = "wefood-key";
+    private static final String RESTAURANT_ID = "oijqwoieqwje";
 
 
 
@@ -61,15 +61,20 @@ public class OrderService {
                 orderItems,
                 addressFormated
         );
+
+        var orderEntity = orderRepository.save(order);
+
         log.info("Producer: Enviando pedido de pagamento");
 
         kafkaTemplate.send(TOPIC, new SendOrderPaymentRequestDto(
-                order.getUserId(),
                 order.getTotal(),
-                ORIGIN_KEY
+                order.getUserId(),
+                RESTAURANT_ID,
+                "ORDER_PAYMENT",
+                orderEntity.getId()
         ));
 
-        return orderRepository.save(order);
+        return orderEntity;
     }
 
     @Transactional
@@ -151,6 +156,8 @@ public class OrderService {
         }
         if(status.validPayment()){
             order.get().setStatus(OrderStatus.PREPARING);
+        }else{
+            order.get().setStatus(OrderStatus.PAYMENT_ERROR);
         }
 
         orderRepository.save(order.get());

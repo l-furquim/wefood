@@ -5,6 +5,7 @@ import com.lucas.payment_ms.domains.account.enums.AccountType;
 import com.lucas.payment_ms.domains.transaction.Transaction;
 import com.lucas.payment_ms.domains.transaction.dto.CancelTransactionDto;
 import com.lucas.payment_ms.domains.transaction.dto.CreateTransactionDto;
+import com.lucas.payment_ms.domains.transaction.dto.SendPaymentResponseDto;
 import com.lucas.payment_ms.domains.transaction.enums.TransactionStatus;
 import com.lucas.payment_ms.domains.transaction.enums.TransactionType;
 import com.lucas.payment_ms.domains.transaction.exceptions.InvalidTransactionCreateException;
@@ -13,6 +14,7 @@ import com.lucas.payment_ms.domains.transaction.exceptions.TransactionNotFoundEx
 import com.lucas.payment_ms.repositories.AccountRepository;
 import com.lucas.payment_ms.repositories.TransactionRepository;
 import com.lucas.payment_ms.services.ITransactionService;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,12 +27,16 @@ public class TransactionService implements ITransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
+    private final KafkaTemplate<String, SendPaymentResponseDto> kafkaTemplate;
+    private static final String TOPIC = "order.confirmed";
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository) {
+    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, KafkaTemplate<String, SendPaymentResponseDto> kafkaTemplate) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
+    @Transactional
     @Override
     public Transaction create(CreateTransactionDto data) {
         if (data.payeeKey() == null ||
@@ -41,9 +47,9 @@ public class TransactionService implements ITransactionService {
 
             throw new InvalidTransactionCreateException("Invalid data during the transaction process");
         }
-        final var payee = accountRepository.findByKey(data.payeeKey());
+        final var payee = accountRepository.findByKeyOrUserId(data.payeeKey(), data.payeeKey());
 
-        final var payer = accountRepository.findByKey(data.payerKey());
+        final var payer = accountRepository.findByKeyOrUserId(data.payerKey(), data.payerKey());
 
         if(payee.isEmpty()){
             throw new InvalidTransactionException("Invalid transaction: payee doesn't exits");
@@ -53,7 +59,13 @@ public class TransactionService implements ITransactionService {
             throw new InvalidTransactionException("Invalid transaction: payer doesn't exits");
         }
 
+
         validate(data.value(), payee.get(),payer.get(), data.type());
+
+        kafkaTemplate.send(TOPIC, new SendPaymentResponseDto(
+                true,
+                data.orderId()
+        ));
 
         var transaction = new Transaction(
                 data.value(),
@@ -68,6 +80,9 @@ public class TransactionService implements ITransactionService {
         payee.get().credit(data.value());
 
         transactionRepository.save(transaction);
+        accountRepository.save(payee.get());
+        accountRepository.save(payer.get());
+
 
         return transaction;
     }

@@ -1,29 +1,30 @@
-package com.lucas.pedido_ms.config.kafka;
+package com.lucas.payment_ms.config.kafka;
 
-import com.lucas.pedido_ms.domains.order.dto.SendOrderPaymentRequestDto;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.annotation.EnableKafka;
+import com.lucas.payment_ms.domains.transaction.dto.SendPaymentResponseDto;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+
 import java.util.HashMap;
 import java.util.Map;
 
-
-@EnableKafka
 @Configuration
+@EnableKafka
 public class KafkaProducerConfig {
 
     @Value(value = "${spring.kafka.bootstrap-servers:localhost:9092}")
     private String bootstrapAddress;
 
+
     @Bean
-    public ProducerFactory<String, SendOrderPaymentRequestDto> producerFactory() {
+    public ProducerFactory<String, SendPaymentResponseDto> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -39,7 +40,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, SendOrderPaymentRequestDto> kafkaTemplate() {
+    public KafkaTemplate<String, SendPaymentResponseDto> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }

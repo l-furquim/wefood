@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @EnableKafka
 public class OrderPayedListener {
 
-    private static final String TOPIC = "transaction.response";
+    private static final String TOPIC = "order.confirmed";
     private static final String GROUP_ID = "wefood";
     private static final Logger log = LoggerFactory.getLogger(OrderPayedListener.class);
 
@@ -26,10 +26,10 @@ public class OrderPayedListener {
 
         try{
             orderService.updateOrderStatus(data);
+            log.info("Status do pedido alterado com sucesso.");
         }catch (Exception e){
             log.error("Erro ao alterar o status do pedido {}",e.getMessage());
         }
 
-        log.info("Status do pedido alterado com sucesso.");
     }
 }
