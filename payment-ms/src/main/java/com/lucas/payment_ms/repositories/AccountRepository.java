@@ -14,4 +14,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Query("SELECT a FROM Account a WHERE a.key = :key OR a.user_id = :userId")
     Optional<Account> findByKeyOrUserId(@Param("key") String key, @Param("userId") String userId);
 
+    @Query("SELECT a FROM Account a WHERE a.key = :key")
+    Optional<Account> findByKey(@Param("key") String key);
+
 }

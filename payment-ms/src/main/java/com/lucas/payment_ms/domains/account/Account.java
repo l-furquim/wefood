@@ -1,5 +1,6 @@
 package com.lucas.payment_ms.domains.account;
 
+import com.lucas.payment_ms.domains.account.enums.AccountType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,11 +26,13 @@ public class Account {
 
     private String key;
 
+    private AccountType type;
 
-    public Account(String userId, BigDecimal balance, String key) {
+    public Account(String userId, BigDecimal balance, String key, AccountType type) {
         this.userId = userId;
         this.balance = balance;
         this.key = key;
+        this.type = type;
     }
 
     public void debit(BigDecimal value){

@@ -3,7 +3,9 @@ package com.lucas.payment_ms.services.impl;
 import com.lucas.payment_ms.domains.account.Account;
 import com.lucas.payment_ms.domains.account.dto.CreateAccountDto;
 import com.lucas.payment_ms.domains.account.dto.DeleteAccountDto;
+import com.lucas.payment_ms.domains.account.enums.AccountType;
 import com.lucas.payment_ms.domains.account.exceptions.AccountAlredyExistsException;
+import com.lucas.payment_ms.domains.account.exceptions.AccountNotFoundException;
 import com.lucas.payment_ms.domains.account.exceptions.InvalidCreateAccountDataException;
 import com.lucas.payment_ms.repositories.AccountRepository;
 import com.lucas.payment_ms.services.IAccountService;
@@ -33,10 +35,17 @@ public class AccountServiceImpl implements IAccountService {
             throw new AccountAlredyExistsException("A account already exists with this id linked or key");
         }
 
+        AccountType type = AccountType.COMUM;
+
+        if(data.key().length() == 14){
+            type = AccountType.RESTAURANT;
+        }
+
         var account = new Account(
                 data.userId(),
                 BigDecimal.ZERO,
-                data.key()
+                data.key(),
+                type
         );
 
         accountRepository.save(account);
@@ -46,16 +55,31 @@ public class AccountServiceImpl implements IAccountService {
 
     @Override
     public void delete(DeleteAccountDto data) {
+        if(data.id() == null || data.id() < 0){
+            throw new InvalidCreateAccountDataException("Invalid data for deleting a account");
+        }
 
+        var account = accountRepository.findById(data.id());
+
+        if(account.isEmpty()){
+            throw new AccountNotFoundException("Account not found");
+        }
+
+        accountRepository.delete(account.get());
     }
 
     @Override
     public List<Account> getAll() {
-        return List.of();
+        return accountRepository.findAll();
     }
 
     @Override
     public Account findById(Long id) {
-        return null;
+        var account = accountRepository.findById(id);
+
+        if(account.isEmpty()){
+            return null;
+        }
+        return account.get();
     }
 }

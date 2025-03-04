@@ -42,4 +42,5 @@ public class Transaction {
         this.type = type;
         this.transferredAt = transferredAt;
     }
+
 }
