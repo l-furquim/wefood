@@ -1,4 +1,4 @@
-package com.lucas.notification_ms.controller.notification.impl;
+package com.lucas.notification_ms.controller.impl;
 
 import com.lucas.notification_ms.domains.notification.Notification;
 import com.lucas.notification_ms.domains.notification.dto.CreateNotificationDto;

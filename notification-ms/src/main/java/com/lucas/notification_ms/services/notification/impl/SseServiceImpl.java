@@ -53,11 +53,13 @@ public class SseServiceImpl implements ISseService {
         String jsonData = obMapper.writeValueAsString(obNode);
         var emitter = emitterSingleton.get(userToBeNotified);
 
-        try {
-            emitter.send(SseEmitter.event().name(EVENT_NAME).data(jsonData));
-        } catch (Exception e) {
-            emitter.completeWithError(e);
-            emitterSingleton.remove(userToBeNotified);
+        if(emitter != null){
+            try {
+                emitter.send(SseEmitter.event().name(EVENT_NAME).data(jsonData));
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+                emitterSingleton.remove(userToBeNotified);
+            }
         }
     }
 
