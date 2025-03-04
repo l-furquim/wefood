@@ -2,9 +2,7 @@ package com.lucas.notification_ms.domains.notification;
 
 import com.lucas.notification_ms.domains.notification.enums.NotificationType;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -40,3 +38,6 @@ public class Notification {
         this.type = type;
     }
 }
+
+
+
