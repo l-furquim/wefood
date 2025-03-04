@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
+@Data
+@Builder
 @Table(name = "notifications")
 public class Notification {
 
@@ -29,14 +32,6 @@ public class Notification {
     private Long orderId;
 
     private NotificationType type;
-
-    public Notification(String content, String userId, LocalDateTime createdAt, Long orderId, NotificationType type) {
-        this.content = content;
-        this.userId = userId;
-        this.createdAt = createdAt;
-        this.orderId = orderId;
-        this.type = type;
-    }
 }
 
 

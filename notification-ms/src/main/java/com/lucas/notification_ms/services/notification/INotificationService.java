@@ -12,5 +12,5 @@ public interface INotificationService {
     Notification create(CreateNotificationDto data);
     void delete(DeleteNotificationDto data);
     List<Notification> getAll();
-    Optional<Notification> findById(Long id);
+    Notification findById(Long id);
 }

@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.lucas.notification_ms.domains.notification.enums.NotificationType;
 import com.lucas.notification_ms.services.notification.ISseService;
 import com.lucas.notification_ms.utils.EmitterSingleton;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+@Slf4j
 @Service
 public class SseServiceImpl implements ISseService {
 
@@ -59,14 +61,17 @@ public class SseServiceImpl implements ISseService {
         }
     }
 
-        private SseEmitter getEmitterInstance(final String identifier){
-            emitterSingleton.remove(identifier);
-            var newEmitter = new SseEmitter(EXPIRATION);
+    private SseEmitter getEmitterInstance(final String identifier){
+        emitterSingleton.remove(identifier);
+
+        var newEmitter = new SseEmitter(EXPIRATION);
+
         emitterSingleton.put(identifier, newEmitter);
 
         try{
             newEmitter.send(SseEmitter.event().name("OK").data("Connection ok"));
         }catch (Exception e){
+            log.info("Erro ao estabelecer conexção sse: " + e.getMessage());
             newEmitter.completeWithError(e);
             emitterSingleton.remove(identifier);
         }
