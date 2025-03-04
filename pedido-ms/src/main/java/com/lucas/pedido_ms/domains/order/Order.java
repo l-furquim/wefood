@@ -24,7 +24,6 @@ public class Order {
     @Column(name = "user_id")
     private String userId;
 
-    @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -43,13 +42,14 @@ public class Order {
 
     }
 
-    public Order(BigDecimal total, String userId, OrderStatus status, List<OrderItem> items, String address) {
+    public Order(BigDecimal total, String userId, OrderStatus status, List<OrderItem> items, String address, LocalDateTime createdAt) {
         this.total = total;
         this.userId = userId;
         this.orderItems = items.size();
         this.status = status;
         this.items = items;
         this.address = address;
+        this.createdAt = createdAt;
     }
 
     public void setTotal(BigDecimal total) {
