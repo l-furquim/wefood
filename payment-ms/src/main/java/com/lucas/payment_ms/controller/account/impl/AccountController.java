@@ -1,5 +1,6 @@
-package com.lucas.payment_ms.controller;
+package com.lucas.payment_ms.controller.account.impl;
 
+import com.lucas.payment_ms.controller.account.IAccountController;
 import com.lucas.payment_ms.domains.account.Account;
 import com.lucas.payment_ms.domains.account.dto.CreateAccountDto;
 import com.lucas.payment_ms.domains.account.dto.DeleteAccountDto;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("v1/api/accounts")
-public class AccountController {
+public class AccountController implements IAccountController{
 
     private final IAccountService accountService;
 

@@ -1,5 +1,6 @@
-package com.lucas.payment_ms.controller;
+package com.lucas.payment_ms.controller.transaction.impl;
 
+import com.lucas.payment_ms.controller.transaction.ITransactionController;
 import com.lucas.payment_ms.domains.transaction.Transaction;
 import com.lucas.payment_ms.domains.transaction.dto.CancelTransactionDto;
 import com.lucas.payment_ms.domains.transaction.dto.CreateTransactionDto;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("v1/api/transactions")
-public class TransactionController {
+public class TransactionController implements ITransactionController {
 
         private final ITransactionService transactionService;
 
