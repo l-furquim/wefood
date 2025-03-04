@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
-    @Query("SELECT a FROM Account a WHERE a.key = :key OR a.user_id = :userId")
+    @Query("SELECT a FROM Account a WHERE a.key = :key OR a.userId = :userId")
     Optional<Account> findByKeyOrUserId(@Param("key") String key, @Param("userId") String userId);
 
     @Query("SELECT a FROM Account a WHERE a.key = :key")
