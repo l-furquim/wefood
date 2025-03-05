@@ -1,5 +1,6 @@
 package com.lucas.notification_ms.controller.impl;
 
+import com.lucas.notification_ms.controller.ISseController;
 import com.lucas.notification_ms.services.notification.ISseService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/v1/sse")
-public class SseController {
+public class SseController implements ISseController {
 
     private final ISseService sseService;
 

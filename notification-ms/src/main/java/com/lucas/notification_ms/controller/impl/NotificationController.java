@@ -1,5 +1,6 @@
 package com.lucas.notification_ms.controller.impl;
 
+import com.lucas.notification_ms.controller.INotificationController;
 import com.lucas.notification_ms.domains.notification.Notification;
 import com.lucas.notification_ms.domains.notification.dto.CreateNotificationDto;
 import com.lucas.notification_ms.domains.notification.dto.DeleteNotificationDto;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("v1/api/notifications")
-public class NotificationController {
+public class NotificationController implements INotificationController {
 
     private final INotificationService notificationService;
 
