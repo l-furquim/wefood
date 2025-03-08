@@ -29,10 +29,9 @@ public class NotificationServiceImpl implements INotificationService {
     }
 
     @Override
-    public Notification create(CreateNotificationDto data){
+    public Notification create(CreateNotificationDto data) throws ErrorSendingNotification{
         if(data.content() == null ||
             data.content().isEmpty() ||
-            data.orderId() == null ||
             data.userToBeNotified() == null
             ){
             throw new InvalidDataCreateNotificationException("Invalid data for creating a notification");

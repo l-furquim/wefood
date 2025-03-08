@@ -82,4 +82,15 @@ public class AccountServiceImpl implements IAccountService {
         }
         return account.get();
     }
+
+    @Override
+    public Account findByKey(String key) {
+        var account = accountRepository.findByKey(key);
+
+        if(account.isEmpty()){
+            return null;
+        }
+
+        return account.get();
+    }
 }

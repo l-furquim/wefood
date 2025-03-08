@@ -12,5 +12,6 @@ public interface IAccountService {
     void delete(DeleteAccountDto data);
     List<Account> getAll();
     Account findById(Long id);
+    Account findByKey(String key);
 
 }

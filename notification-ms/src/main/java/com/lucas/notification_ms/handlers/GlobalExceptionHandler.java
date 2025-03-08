@@ -1,8 +1,9 @@
-package com.lucas.notification_ms.handlers.dto;
+package com.lucas.notification_ms.handlers;
 
 import com.lucas.notification_ms.domains.notification.exceptions.ErrorSendingNotification;
 import com.lucas.notification_ms.domains.notification.exceptions.InvalidDataCreateNotificationException;
 import com.lucas.notification_ms.domains.notification.exceptions.NotificationNotFoundException;
+import com.lucas.notification_ms.handlers.dto.CustomErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,16 +23,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.internalServerError().body(response);
     }
-    @ExceptionHandler({ErrorSendingNotification.class})
-    private ResponseEntity<CustomErrorResponse> handleErrorSendingNotification(Exception e, HttpServletRequest request){
-        CustomErrorResponse response = new CustomErrorResponse(
-                500,
-                e.getMessage(),
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.internalServerError().body(response);
-    }
+//    @ExceptionHandler({ErrorSendingNotification.class})
+//    private ResponseEntity<CustomErrorResponse> handleErrorSendingNotification(Exception e, HttpServletRequest request){
+//        CustomErrorResponse response = new CustomErrorResponse(
+//                500,
+//                e.getMessage(),
+//                request.getRequestURI()
+//        );
+//
+//        return ResponseEntity.internalServerError().body(response);
+//    }
 
     @ExceptionHandler({InvalidDataCreateNotificationException.class})
     private ResponseEntity<CustomErrorResponse> handleInvalidDataCreateNotification(Exception e, HttpServletRequest request){
