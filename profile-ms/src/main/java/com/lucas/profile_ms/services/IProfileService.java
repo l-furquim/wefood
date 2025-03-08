@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface IProfileService {
 
-    Profile create(CreateProfileDto data);
+    String createConfirmation(CreateProfileDto data);
     Profile confirmCode(ConfirmCodeDto data);
     void delete(DeleteProfileDto data);
     Profile findById(String id);

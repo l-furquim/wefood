@@ -1,6 +1,14 @@
 version: '3.8'
 
 services:
+  redis:
+    image: redis:latest
+    container_name: wefood-redis
+    restart: always
+    hostname: redis
+    ports:
+      - "6379:6379"
+
   postgres:
     image: postgres:13
     container_name: wefood-postgres
@@ -37,3 +45,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

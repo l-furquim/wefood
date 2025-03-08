@@ -2,7 +2,8 @@ package com.lucas.profile_ms.domains.profile.enums;
 
 public enum ProfileType {
     COMUM(1),
-    RESTAURANT(2);
+    WAITING_CONFIRMATION(2),
+    RESTAURANT(3);
 
     private int value;
 
