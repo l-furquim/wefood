@@ -20,12 +20,14 @@ public class OrderPayedListener {
     @Autowired
     private OrderService orderService;
 
+
     @KafkaListener(topics = TOPIC, groupId = GROUP_ID)
     public void receiveConfirmation(OrderPaymentConfirmedDto data){
         log.info("Consumer: id do pedido com confirmação chegou: {}",data);
 
         try{
             orderService.updateOrderStatus(data);
+
             log.info("Status do pedido alterado com sucesso.");
         }catch (Exception e){
             log.error("Erro ao alterar o status do pedido {}",e.getMessage());

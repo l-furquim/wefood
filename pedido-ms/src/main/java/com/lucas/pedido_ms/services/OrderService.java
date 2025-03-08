@@ -25,16 +25,22 @@ public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private final KafkaTemplate<String, SendOrderPaymentRequestDto> kafkaTemplate;
+    private final KafkaTemplate<String, SendOrderPaymentRequestDto> transactionTemplate;
+    private final KafkaTemplate<String, SendOrderNotificationDto> notificationTemplate;
     private static final String TOPIC = "transaction.request";
     private static final String RESTAURANT_ID = "oijqwoieqwje";
 
 
 
-    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, KafkaTemplate<String, SendOrderPaymentRequestDto> kafkaTemplate) {
+    public OrderService(OrderRepository orderRepository,
+                        OrderItemRepository orderItemRepository,
+                        KafkaTemplate<String, SendOrderPaymentRequestDto> transactionTemplate,
+                        KafkaTemplate<String, SendOrderNotificationDto> notificationTemplate
+    ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
-        this.kafkaTemplate = kafkaTemplate;
+        this.transactionTemplate = transactionTemplate;
+        this.notificationTemplate = notificationTemplate;
     }
 
     public Order create(CreateOrderDto data){
@@ -68,7 +74,7 @@ public class OrderService {
 
         log.info("Producer: Enviando pedido de pagamento");
 
-        kafkaTemplate.send(TOPIC, new SendOrderPaymentRequestDto(
+        transactionTemplate.send(TOPIC, new SendOrderPaymentRequestDto(
                 order.getTotal(),
                 order.getUserId(),
                 RESTAURANT_ID,
@@ -161,6 +167,16 @@ public class OrderService {
         }else{
             order.get().setStatus(OrderStatus.PAYMENT_ERROR);
         }
+
+        notificationTemplate.send(
+                "notification.order",
+                new SendOrderNotificationDto(
+                                order.get().getUserId(),
+                        "Status do pedido: " + order.get().getStatus().toString().toLowerCase(),
+                                order.get().getId(),
+                            "PAYMENT"
+                )
+        );
 
         orderRepository.save(order.get());
     }

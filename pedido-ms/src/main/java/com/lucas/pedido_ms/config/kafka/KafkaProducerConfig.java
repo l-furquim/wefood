@@ -1,5 +1,6 @@
 package com.lucas.pedido_ms.config.kafka;
 
+import com.lucas.pedido_ms.domains.order.dto.SendOrderNotificationDto;
 import com.lucas.pedido_ms.domains.order.dto.SendOrderPaymentRequestDto;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -23,23 +24,30 @@ public class KafkaProducerConfig {
     private String bootstrapAddress;
 
     @Bean
-    public ProducerFactory<String, SendOrderPaymentRequestDto> producerFactory() {
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(
-                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                bootstrapAddress);
-        configProps.put(
-                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                StringSerializer.class);
-        configProps.put(
-                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                JsonSerializer.class);
-
-        return new DefaultKafkaProducerFactory<>(configProps);
+    public ProducerFactory<String, SendOrderPaymentRequestDto> orderProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfigs());
+    }
+    @Bean
+    public ProducerFactory<String, SendOrderNotificationDto> notificationProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
     @Bean
+    public KafkaTemplate<String, SendOrderNotificationDto> notificationKafkaTemplate() {
+        return new KafkaTemplate<>(notificationProducerFactory());
+    }
+
+
+    @Bean
     public KafkaTemplate<String, SendOrderPaymentRequestDto> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+        return new KafkaTemplate<>(orderProducerFactory());
+    }
+
+    private Map<String, Object> producerConfigs() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return props;
     }
 }
