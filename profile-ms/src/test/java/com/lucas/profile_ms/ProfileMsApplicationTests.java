@@ -1,10 +1,10 @@
-package com.lucas.account_ms;
+package com.lucas.profile_ms;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class AccountMsApplicationTests {
+class ProfileMsApplicationTests {
 
 	@Test
 	void contextLoads() {
