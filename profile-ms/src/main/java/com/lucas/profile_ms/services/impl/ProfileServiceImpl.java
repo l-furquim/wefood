@@ -1,6 +1,7 @@
 package com.lucas.profile_ms.services.impl;
 
 import com.lucas.profile_ms.domains.profile.Profile;
+import com.lucas.profile_ms.domains.profile.dto.AuthProfileDto;
 import com.lucas.profile_ms.domains.profile.dto.ConfirmCodeDto;
 import com.lucas.profile_ms.domains.profile.dto.CreateProfileDto;
 import com.lucas.profile_ms.domains.profile.dto.DeleteProfileDto;
@@ -10,7 +11,12 @@ import com.lucas.profile_ms.domains.profile.exceptions.InvalidDataCreateProfileE
 import com.lucas.profile_ms.domains.profile.exceptions.ProfileAlredyExistsException;
 import com.lucas.profile_ms.repositories.ProfileRepository;
 import com.lucas.profile_ms.services.IProfileService;
+import com.lucas.profile_ms.services.ITokenService;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,12 +30,16 @@ public class ProfileServiceImpl implements IProfileService {
 
     private final ProfileRepository profileRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final AuthenticationManager authenticationManager;
+    private final ITokenService tokenService;
 
-    public ProfileServiceImpl(ProfileRepository profileRepository, RedisTemplate<String, Object> redisTemplate) {
+
+    public ProfileServiceImpl(ProfileRepository profileRepository, RedisTemplate<String, Object> redisTemplate, AuthenticationManager authenticationManager, ITokenService tokenService) {
         this.profileRepository = profileRepository;
         this.redisTemplate = redisTemplate;
+        this.authenticationManager = authenticationManager;
+        this.tokenService = tokenService;
     }
-
 
     @Override
     public String createConfirmation(CreateProfileDto data) {
@@ -49,20 +59,19 @@ public class ProfileServiceImpl implements IProfileService {
         var profile = Profile.builder()
                 .id(UUID.randomUUID().toString())
                 .email(data.email())
-                .password(data.password())
+                .password(new BCryptPasswordEncoder().encode(data.password()))
                 .username(data.username())
                 .createdAt(LocalDateTime.now())
                 .type(ProfileType.WAITING_CONFIRMATION)
                 .build();
 
         var confirmationCode = String.valueOf(ThreadLocalRandom.current().nextInt(
-                100000,
+                11111,
                 99999
         ));
 
         redisTemplate.opsForValue().set(data.email() + confirmationCode, "valid", 1000);
         profileRepository.save(profile);
-
 
         return confirmationCode;
     }
@@ -102,5 +111,30 @@ public class ProfileServiceImpl implements IProfileService {
     @Override
     public List<Profile> getAll() {
         return profileRepository.findAll();
+    }
+
+    @Override
+    public UserDetails findByEmailDetails(String email) {
+        return profileRepository.findByEmailDetails(email);
+    }
+
+    @Override
+    public String auth(AuthProfileDto data) {
+        if(data.email() == null || data.email().isEmpty() || !data.email().contains("@") ||
+                data.password() == null || data.password().isEmpty()){
+
+            throw new InvalidDataCreateProfileException("Invalid data during profile authentication");
+        }
+
+        var usernamePassword = new UsernamePasswordAuthenticationToken(
+                data.email(),
+                data.password()
+        );
+
+        var auth = authenticationManager.authenticate(usernamePassword);
+
+        return tokenService.generateToken(
+                (Profile) auth.getPrincipal()
+        );
     }
 }

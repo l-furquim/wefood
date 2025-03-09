@@ -1,5 +1,10 @@
 package com.lucas.profile_ms.config.security;
 
+import com.lucas.profile_ms.repositories.ProfileRepository;
+import com.lucas.profile_ms.services.IProfileService;
+import com.lucas.profile_ms.services.ITokenService;
+import com.lucas.profile_ms.services.impl.ProfileServiceImpl;
+import com.lucas.profile_ms.services.impl.TokenServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -8,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -16,33 +22,36 @@ import java.io.IOException;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
+
     @Autowired
-    private AuthService authService;
+    private TokenServiceImpl tokenService;
 
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse httpServletResponse,
-                                    FilterChain filterChain) throws ServletException, IOException{
+    @Autowired
+    private ProfileRepository profileRepository;
 
-        final var authToken = request.getHeader("Authorization");
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        var token = recoverToken(request);
 
-        if(authToken != null){
-            final var aToken = authToken.replace("Bearer ", "");
+        if(token != null){
+            var email = tokenService.validateToken(token);
 
-            final var userName = authService.validateToken(aToken);
+            UserDetails profile = profileRepository.findByEmailDetails(email);
 
-            var user = authService.loadUserByUsername(userName);
-
-            final var auth = new UsernamePasswordAuthenticationToken(
-                    user,
+            var authenticationProfile = new UsernamePasswordAuthenticationToken(
+                    profile,
                     null,
-                    user.getAuthorities()
+                    profile.getAuthorities()
             );
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            SecurityContextHolder.getContext().setAuthentication(authenticationProfile);
         }
-        filterChain.doFilter(request, httpServletResponse);
-
-
+        filterChain.doFilter(request, response);
     }
 
+    private String recoverToken(HttpServletRequest request){
+        var authHeader = request.getHeader("Authorization");
+        if(authHeader == null) return null;
+        return authHeader.replace("Bearer ", "");
+    }
 }
