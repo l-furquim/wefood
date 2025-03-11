@@ -1,0 +1,23 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: mailsender-ms
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wefood
+    username: root
+    password: root
+    driver-class-name: org.postgresql.Driver
+    jpa:
+      show-sql: false
+      hibernate:
+        ddl-auto: update
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+mail:
+    host: smtp.gmail.com
+    port: 587
+    username: furquimmsw@gmail.com
+    password: dhsv bmpt fbed kbpu
