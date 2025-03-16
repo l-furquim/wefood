@@ -8,6 +8,7 @@ import com.lucas.mailsender_ms.domains.mail.exceptions.MailNotFoundException;
 import com.lucas.mailsender_ms.repositories.MailRepository;
 import com.lucas.mailsender_ms.services.IMailService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,11 @@ import java.util.List;
 @Service
 public class MailServiceImpl implements IMailService {
 
-    private final MailRepository mailRepository;
-    private final JavaMailSender javaMailSender;
+    @Autowired
+    private MailRepository mailRepository;
 
-    public MailServiceImpl(MailRepository mailRepository, JavaMailSender javaMailSender) {
-        this.mailRepository = mailRepository;
-        this.javaMailSender = javaMailSender;
-    }
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     @Override
     public void send(SendMailDto data) {
