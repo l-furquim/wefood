@@ -1,4 +1,4 @@
-# wefood
+# wefood 🍔 
 
 # Sistema de Delivery com Microserviços
 
@@ -18,15 +18,14 @@ A arquitetura é baseada em microserviços, permitindo que cada serviço seja de
 
 ## Microserviços
 
-### 1. ms de pagamento
+### 1. ![Pagamento](https://img.shields.io/badge/Microserviço%20Pagamento-blue)
 - **Descrição:** Processa pagamentos e gerencia as contas bancárias dos usuários e restaurantes.
 - **Tecnologias:** Spring Boot, Spring Cloud, Apache Kafka,Redis.
 - **Comunicação:** Interage com o microserviço de pedidos via Apache Kafka para sincronização dos processos de pagamento.
-- **Ícone:** ![Pagamento](https://img.shields.io/badge/Microserviço%20Pagamento-blue)
 
 ---
 
-### 2. ms de pedidos
+### 2.![Pedidos](https://img.shields.io/badge/Microserviço%20Pedidos-orange)
 - **Descrição:** Gerencia a criação e o processamento dos pedidos realizados pelos usuários.
 - **Integrações:** 
   - Se comunica com o **ms de pagamento** para a confirmação e processamento dos pagamentos.
@@ -34,21 +33,19 @@ A arquitetura é baseada em microserviços, permitindo que cada serviço seja de
   - Se conecta com o **ms de notificações** para enviar alertas e atualizações em tempo real.
 - **Tecnologias:** Spring Boot, Apache Kafka,Redis.
 - **Comunicação:** Utiliza o **Apache Kafka** para a comunicação assíncrona entre os microserviços.
-- **Ícone:** ![Pedidos](https://img.shields.io/badge/Microserviço%20Pedidos-orange)
 
 ---
 
-### 3. ms de profile
+### 3.![Profile](https://img.shields.io/badge/Microserviço%20Profile-green)
 - **Descrição:** Gerencia o cadastro dos usuários e realiza a autenticação, emitindo tokens JWT para acesso seguro ao sistema.
 - **Tecnologias:** Spring Boot, Spring Security, JWT,Redis, Apache Kafka.
 - **Funcionalidades:** 
   - Cadastro de novos usuários.
   - Emissão e validação de tokens JWT para autenticação.
-- **Ícone:** ![Profile](https://img.shields.io/badge/Microserviço%20Profile-green)
 
 ---
 
-### 4. ms de email
+### 4. ![Profile](https://img.shields.io/badge/Microserviço%20Mail-red)
 - **Descrição:** Gerencia o pedido de envios de email e cancelamento dos mesmos.
 - **Tecnologias:** Spring Boot, Spring mailer,Redis, Apache kafka.
 - **Funcionalidades:** 
@@ -56,18 +53,16 @@ A arquitetura é baseada em microserviços, permitindo que cada serviço seja de
   - Envio dos emails
   - Cancelamento dos emails
   - Listener disponibilizado para o envio dos emails assincronos.
-- **Ícone:** ![Profile](https://img.shields.io/badge/Microserviço%20Profile-red)
 
 ---
 
-### 5. ms de notificacao
+### 5. ![Profile](https://img.shields.io/badge/Microserviço%20Notification-purple)
 - **Descrição:** Gerencia o envio de notificações utilizando o protocolo SSE (Server sent event).
 - **Tecnologias:** Spring Boot, Spring mailer,Redis, Apache kafka.
 - **Funcionalidades:** 
   - Conexão SSE baseada no email do usuário
   - Gerenciamento das notificações enviadas
   - Listener disponibilizado para o envio das notificações assincronas.
-- **Ícone:** ![Profile](https://img.shields.io/badge/Microserviço%20Notification-purple)
 
 ## Tecnologias Utilizadas
 
@@ -91,10 +86,3 @@ A arquitetura é baseada em microserviços, permitindo que cada serviço seja de
 - **Apache Kafka**, **Redis** e **Postgres** configurados (caso não utilize containers Docker)
 
 ---
-
-## Como Executar
-
-1. **Clone o repositório:**
-   ```bash
-   git clone https://seurepositorio.git
-   cd seu-projeto
