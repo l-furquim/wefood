@@ -28,22 +28,24 @@ public class OrderService {
     private final KafkaTemplate<String, SendOrderPaymentRequestDto> transactionTemplate;
     private final KafkaTemplate<String, SendOrderNotificationDto> notificationTemplate;
     private final KafkaTemplate<String, SendOrderMailDto> mailTemplate;
-    private static final String TOPIC = "transaction.request";
+    private static final String TRANSACTION_TOPIC = "transaction.request";
     private static final String RESTAURANT_ID = "oijqwoieqwje";
-
-
+    private static final String MAIL_TOPIC = "mail.request";
+    private final ProfileClientService profileClientService;
 
     public OrderService(OrderRepository orderRepository,
                         OrderItemRepository orderItemRepository,
                         KafkaTemplate<String, SendOrderPaymentRequestDto> transactionTemplate,
                         KafkaTemplate<String, SendOrderNotificationDto> notificationTemplate,
-                        KafkaTemplate<String, SendOrderMailDto> mailTemplate
+                        KafkaTemplate<String, SendOrderMailDto> mailTemplate,
+                        ProfileClientService profileClientService
     ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.transactionTemplate = transactionTemplate;
         this.notificationTemplate = notificationTemplate;
         this.mailTemplate = mailTemplate;
+        this.profileClientService = profileClientService;
     }
 
     public Order create(CreateOrderDto data){
@@ -77,7 +79,7 @@ public class OrderService {
 
         log.info("Producer: Enviando pedido de pagamento");
 
-        transactionTemplate.send(TOPIC, new SendOrderPaymentRequestDto(
+        transactionTemplate.send(TRANSACTION_TOPIC, new SendOrderPaymentRequestDto(
                 order.getTotal(),
                 order.getUserId(),
                 RESTAURANT_ID,
@@ -158,7 +160,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateOrderStatus(OrderPaymentConfirmedDto status){
+    public void updateOrderConfirmation(OrderPaymentConfirmedDto status){
         var order = orderRepository.findById(status.orderId());
 
         if(order.isEmpty()){
@@ -182,4 +184,33 @@ public class OrderService {
 
         orderRepository.save(order.get());
     }
+
+    @Transactional
+    public Order updateOrderStatus(UpdateOrderStatusDto data){
+        var order = orderRepository.findById(data.orderId());
+
+        if(order.isEmpty()){
+            throw new OrderNotFoundException("Order not found while attempting to update the status " + data.orderId());
+        }
+
+        if(data.status().equals(OrderStatus.RECEIVED)){
+            var email = profileClientService.getUserEmail(order.get().getUserId());
+
+            if(!email.isEmpty()){
+                mailTemplate.send(
+                        MAIL_TOPIC,
+                        new SendOrderMailDto(
+                            email,
+                                "furquimmsw@gmail.com",
+                                "Pedido recebido com sucesso - " + order.get().getId(),
+                                "Olá ! \n Agradecemos por realizar um pedido no we-food, esperamos que tenha uma ótima refeição! ",
+                                order.get().getUserId(),
+                                "ORDER"
+                        )
+                );
+            }
+        }
+        return order.get();
+    }
+
 }

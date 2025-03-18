@@ -5,6 +5,7 @@ import com.lucas.pedido_ms.domains.order.Order;
 import com.lucas.pedido_ms.domains.order.dto.CreateOrderDto;
 import com.lucas.pedido_ms.domains.order.dto.DeleteOrderDto;
 import com.lucas.pedido_ms.domains.order.dto.UpdateOrderDto;
+import com.lucas.pedido_ms.domains.order.dto.UpdateOrderStatusDto;
 import com.lucas.pedido_ms.services.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,5 +48,12 @@ public class OrderController implements IOrderController {
         var orders = orderService.get();
 
         return ResponseEntity.ok().body(orders);
+    }
+
+    @PutMapping("/status")
+    public ResponseEntity<Order> updateOrderStatus(@RequestBody UpdateOrderStatusDto data){
+        var order = orderService.updateOrderStatus(data);
+
+        return ResponseEntity.ok().body(order);
     }
 }

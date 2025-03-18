@@ -26,7 +26,7 @@ public class OrderPayedListener {
         log.info("Consumer: id do pedido com confirmação chegou: {}",data);
 
         try{
-            orderService.updateOrderStatus(data);
+            orderService.updateOrderConfirmation(data);
 
             log.info("Status do pedido alterado com sucesso.");
         }catch (Exception e){
