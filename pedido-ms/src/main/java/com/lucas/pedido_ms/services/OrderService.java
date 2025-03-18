@@ -27,6 +27,7 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final KafkaTemplate<String, SendOrderPaymentRequestDto> transactionTemplate;
     private final KafkaTemplate<String, SendOrderNotificationDto> notificationTemplate;
+    private final KafkaTemplate<String, SendOrderMailDto> mailTemplate;
     private static final String TOPIC = "transaction.request";
     private static final String RESTAURANT_ID = "oijqwoieqwje";
 
@@ -35,12 +36,14 @@ public class OrderService {
     public OrderService(OrderRepository orderRepository,
                         OrderItemRepository orderItemRepository,
                         KafkaTemplate<String, SendOrderPaymentRequestDto> transactionTemplate,
-                        KafkaTemplate<String, SendOrderNotificationDto> notificationTemplate
+                        KafkaTemplate<String, SendOrderNotificationDto> notificationTemplate,
+                        KafkaTemplate<String, SendOrderMailDto> mailTemplate
     ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.transactionTemplate = transactionTemplate;
         this.notificationTemplate = notificationTemplate;
+        this.mailTemplate = mailTemplate;
     }
 
     public Order create(CreateOrderDto data){
@@ -105,7 +108,6 @@ public class OrderService {
         }
 
         updateOrderItems(order.get(), data.items(), data.remove());
-
 
         orderRepository.save(order.get());
 

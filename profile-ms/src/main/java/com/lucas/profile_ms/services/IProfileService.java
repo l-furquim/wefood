@@ -18,5 +18,6 @@ public interface IProfileService {
     List<Profile> getAll();
     UserDetails findByEmailDetails(String username);
     String auth(AuthProfileDto data);
+    String getEmail(String userId);
 
 }

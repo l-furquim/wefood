@@ -1,5 +1,6 @@
 package com.lucas.pedido_ms.config.kafka;
 
+import com.lucas.pedido_ms.domains.order.dto.SendOrderMailDto;
 import com.lucas.pedido_ms.domains.order.dto.SendOrderNotificationDto;
 import com.lucas.pedido_ms.domains.order.dto.SendOrderPaymentRequestDto;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,11 @@ public class KafkaProducerConfig {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
     @Bean
+    public ProducerFactory<String, SendOrderMailDto> sendOrderMailProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfigs());
+    }
+
+    @Bean
     public ProducerFactory<String, SendOrderNotificationDto> notificationProducerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
@@ -37,6 +43,10 @@ public class KafkaProducerConfig {
         return new KafkaTemplate<>(notificationProducerFactory());
     }
 
+    @Bean
+    public KafkaTemplate<String, SendOrderMailDto> mailKafkaTemplate() {
+        return new KafkaTemplate<>(sendOrderMailProducerFactory());
+    }
 
     @Bean
     public KafkaTemplate<String, SendOrderPaymentRequestDto> kafkaTemplate() {

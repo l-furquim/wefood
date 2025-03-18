@@ -9,6 +9,7 @@ import com.lucas.profile_ms.domains.profile.enums.ProfileType;
 import com.lucas.profile_ms.domains.profile.exceptions.ConfirmationCodeDoesntExists;
 import com.lucas.profile_ms.domains.profile.exceptions.InvalidDataCreateProfileException;
 import com.lucas.profile_ms.domains.profile.exceptions.ProfileAlredyExistsException;
+import com.lucas.profile_ms.domains.profile.exceptions.ProfileNotFoundException;
 import com.lucas.profile_ms.repositories.ProfileRepository;
 import com.lucas.profile_ms.services.IProfileService;
 import com.lucas.profile_ms.services.ITokenService;
@@ -136,5 +137,16 @@ public class ProfileServiceImpl implements IProfileService {
         return tokenService.generateToken(
                 (Profile) auth.getPrincipal()
         );
+    }
+
+    @Override
+    public String getEmail(String userId) {
+        var profile = profileRepository.findById(userId);
+
+        if(profile.isEmpty()){
+            throw new ProfileNotFoundException("Cannot found the profile");
+        }
+
+        return profile.get().getEmail();
     }
 }

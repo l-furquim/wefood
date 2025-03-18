@@ -45,4 +45,11 @@ public class ProfileControllerImpl {
     public ResponseEntity<List<Profile>> getAll(){
         return ResponseEntity.ok().body(profileService.getAll());
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<String> getEmail(@PathVariable("userId")String userId){
+        var email = profileService.getEmail(userId);
+
+        return ResponseEntity.ok().body(email);
+    }
 }

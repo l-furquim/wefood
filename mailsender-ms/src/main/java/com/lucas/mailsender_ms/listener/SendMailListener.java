@@ -26,5 +26,8 @@ public class SendMailListener {
     public void receiveRequest(SendMailDto data) {
         log.info("Consumer: Solicitação de envio de email chegou: {}", data);
 
+        mailService.send(data);
+
+        log.info("Consumer: Finalizado.");
     }
 }

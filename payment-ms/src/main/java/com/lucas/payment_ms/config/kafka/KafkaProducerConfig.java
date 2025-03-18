@@ -1,5 +1,6 @@
 package com.lucas.payment_ms.config.kafka;
 
+import com.lucas.payment_ms.domains.transaction.dto.SendPaymentConfirmationEmailDto;
 import com.lucas.payment_ms.domains.transaction.dto.SendPaymentResponseDto;
 import com.lucas.payment_ms.domains.transaction.dto.SendTransactionNotification;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -27,6 +28,16 @@ public class KafkaProducerConfig {
     @Bean
     public ProducerFactory<String, SendPaymentResponseDto> paymentProducerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
+    }
+
+    @Bean
+    public ProducerFactory<String, SendPaymentConfirmationEmailDto> emailProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfigs());
+    }
+
+    @Bean
+    public KafkaTemplate<String, SendPaymentConfirmationEmailDto> emailKafkaTemplate() {
+        return new KafkaTemplate<>(emailProducerFactory());
     }
 
     @Bean

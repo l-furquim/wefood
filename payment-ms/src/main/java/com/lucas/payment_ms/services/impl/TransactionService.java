@@ -3,9 +3,7 @@ package com.lucas.payment_ms.services.impl;
 import com.lucas.payment_ms.domains.account.Account;
 import com.lucas.payment_ms.domains.account.enums.AccountType;
 import com.lucas.payment_ms.domains.transaction.Transaction;
-import com.lucas.payment_ms.domains.transaction.dto.CancelTransactionDto;
-import com.lucas.payment_ms.domains.transaction.dto.CreateTransactionDto;
-import com.lucas.payment_ms.domains.transaction.dto.SendPaymentResponseDto;
+import com.lucas.payment_ms.domains.transaction.dto.*;
 import com.lucas.payment_ms.domains.transaction.enums.TransactionStatus;
 import com.lucas.payment_ms.domains.transaction.enums.TransactionType;
 import com.lucas.payment_ms.domains.transaction.exceptions.InvalidTransactionCreateException;
@@ -13,6 +11,7 @@ import com.lucas.payment_ms.domains.transaction.exceptions.InvalidTransactionExc
 import com.lucas.payment_ms.domains.transaction.exceptions.TransactionNotFoundException;
 import com.lucas.payment_ms.repositories.AccountRepository;
 import com.lucas.payment_ms.repositories.TransactionRepository;
+import com.lucas.payment_ms.services.IProfileClientService;
 import com.lucas.payment_ms.services.ITransactionService;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -25,15 +24,30 @@ import java.util.List;
 @Service
 public class TransactionService implements ITransactionService {
 
+    private final IProfileClientService profileClientService;
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
-    private final KafkaTemplate<String, SendPaymentResponseDto> kafkaTemplate;
-    private static final String TOPIC = "order.confirmed";
+    private final KafkaTemplate<String, SendPaymentResponseDto> orderTemplate;
+    private static final String ORDER_TOPIC = "order.confirmed";
+    private static final String EMAIL_TOPIC = "email.request";
+    private static final String NOTIFICATION_TOPIC = "notification.transaction";
+    private final KafkaTemplate<String, SendTransactionNotification> notificationKafkaTemplate;
+    private final KafkaTemplate<String, SendPaymentConfirmationEmailDto> emailKafkaTemplate;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, KafkaTemplate<String, SendPaymentResponseDto> kafkaTemplate) {
+    public TransactionService(
+            TransactionRepository transactionRepository,
+            AccountRepository accountRepository,
+            KafkaTemplate<String, SendPaymentResponseDto> orderTemplate,
+            KafkaTemplate<String, SendTransactionNotification> notificationKafkaTemplate,
+            KafkaTemplate<String, SendPaymentConfirmationEmailDto> emailKafkaTemplate,
+            IProfileClientService profileClientService
+    ) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
-        this.kafkaTemplate = kafkaTemplate;
+        this.orderTemplate = orderTemplate;
+        this.notificationKafkaTemplate = notificationKafkaTemplate;
+        this.emailKafkaTemplate = emailKafkaTemplate;
+        this.profileClientService = profileClientService;
     }
 
     @Transactional
@@ -47,6 +61,7 @@ public class TransactionService implements ITransactionService {
 
             throw new InvalidTransactionCreateException("Invalid data during the transaction process");
         }
+
         final var payee = accountRepository.findByKeyOrUserId(data.payeeKey(), data.payeeKey());
 
         final var payer = accountRepository.findByKeyOrUserId(data.payerKey(), data.payerKey());
@@ -61,11 +76,6 @@ public class TransactionService implements ITransactionService {
 
 
         validate(data.value(), payee.get(),payer.get(), data.type());
-
-        kafkaTemplate.send(TOPIC, new SendPaymentResponseDto(
-                true,
-                data.orderId()
-        ));
 
         var transaction = new Transaction(
                 data.value(),
@@ -83,6 +93,7 @@ public class TransactionService implements ITransactionService {
         accountRepository.save(payee.get());
         accountRepository.save(payer.get());
 
+        sendPaymentConfirmation(transaction,data.orderId(), payer.get().getUserId());
 
         return transaction;
     }
@@ -141,5 +152,38 @@ public class TransactionService implements ITransactionService {
         if(payer.getBalance().compareTo(value) < 0){
             throw new InvalidTransactionException("Insufficient balance");
         }
+    }
+
+    private void sendPaymentConfirmation(Transaction transaction, Long orderId, String userId){
+        String email = profileClientService.getEmail(userId);
+
+        orderTemplate.send(ORDER_TOPIC, new SendPaymentResponseDto(
+                true,
+                orderId
+        ));
+
+        notificationKafkaTemplate.send(
+                NOTIFICATION_TOPIC,
+                new SendTransactionNotification(
+                        userId,
+                        "Pagamento do pedido efetuado com sucesso",
+                        null,
+                        "PAYMENT"
+                )
+        );
+
+        emailKafkaTemplate.send(
+                EMAIL_TOPIC,
+                new SendPaymentConfirmationEmailDto(
+                    email,
+                    "furquimmsw@gmail.com",
+                        "Pagamento do pedido - " +  orderId + "confirmado",
+                        "Olá ! \n Viemos informar que o pagamento referente ao pedido " + orderId + "foi confirmado no nosso sistema, no valor de: R$ " + transaction.getValue().toPlainString(),
+                        userId,
+                        "PAYMENT"
+
+                )
+        );
+
     }
 }
