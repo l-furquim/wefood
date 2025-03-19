@@ -33,7 +33,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(
                         authorize -> authorize.requestMatchers(
-                                HttpMethod.PUT, "/v1/api/profiles/confirm").permitAll()
+                                HttpMethod.GET, "/v1/api/profiles/confirm/{code}/{email}").permitAll()
                 )
                 .authorizeHttpRequests(
                         authorize -> authorize.requestMatchers(

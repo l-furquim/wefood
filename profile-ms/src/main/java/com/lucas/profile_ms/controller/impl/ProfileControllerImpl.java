@@ -21,17 +21,17 @@ public class ProfileControllerImpl {
     }
 
     @PostMapping
-    public ResponseEntity<String> createProfileConfirmation(@RequestBody CreateProfileDto data){
-        var code = profileService.createConfirmation(data);
+    public ResponseEntity<Profile> createProfileConfirmation(@RequestBody CreateProfileDto data){
+        var profile = profileService.createConfirmation(data);
 
-        return ResponseEntity.ok().body(code);
+        return ResponseEntity.ok().body(profile);
     }
 
-    @PutMapping("/confirm")
-    public ResponseEntity<Profile> confirmCode(@RequestBody ConfirmCodeDto data){
-        var profile = profileService.confirmCode(data);
+    @GetMapping("/confirm/{code}/{email}")
+    public ResponseEntity<String> confirmCode(@PathVariable("code") String code, @PathVariable("email") String email){
+        profileService.confirmCode(new ConfirmCodeDto(email,code));
 
-        return ResponseEntity.status(201).body(profile);
+        return ResponseEntity.status(201).body("Codigo confirmado com sucesso!");
     }
 
     @PostMapping("/auth")

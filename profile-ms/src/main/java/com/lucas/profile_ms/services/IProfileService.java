@@ -11,8 +11,8 @@ import java.util.List;
 
 public interface IProfileService {
 
-    String createConfirmation(CreateProfileDto data);
-    Profile confirmCode(ConfirmCodeDto data);
+    Profile createConfirmation(CreateProfileDto data);
+    void confirmCode(ConfirmCodeDto data);
     void delete(DeleteProfileDto data);
     Profile findById(String id);
     List<Profile> getAll();

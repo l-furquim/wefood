@@ -19,7 +19,10 @@ public class Mail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name="mail_from")
     private String from;
+
+    @Column(name = "mail_to")
     private String to;
     private String subject;
     private String content;
