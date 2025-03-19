@@ -21,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -30,12 +31,12 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ProfileServiceImpl implements IProfileService {
 
     private final ProfileRepository profileRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
     private final AuthenticationManager authenticationManager;
     private final ITokenService tokenService;
 
 
-    public ProfileServiceImpl(ProfileRepository profileRepository, RedisTemplate<String, Object> redisTemplate, AuthenticationManager authenticationManager, ITokenService tokenService) {
+    public ProfileServiceImpl(ProfileRepository profileRepository, RedisTemplate<String, String> redisTemplate, AuthenticationManager authenticationManager, ITokenService tokenService) {
         this.profileRepository = profileRepository;
         this.redisTemplate = redisTemplate;
         this.authenticationManager = authenticationManager;
@@ -134,9 +135,20 @@ public class ProfileServiceImpl implements IProfileService {
 
         var auth = authenticationManager.authenticate(usernamePassword);
 
-        return tokenService.generateToken(
-                (Profile) auth.getPrincipal()
-        );
+        var user = (Profile) auth.getPrincipal();
+
+        if(!redisTemplate.hasKey(user.getId())){
+            var token = tokenService.generateToken(user);
+
+            redisTemplate.opsForValue().set(
+                    user.getId(),
+                    token,
+                    Duration.ofHours(2)
+            );
+
+            return token;
+        }
+        return redisTemplate.opsForValue().get(user.getId());
     }
 
     @Override

@@ -56,4 +56,14 @@ public class TokenServiceImpl implements ITokenService {
                 plusHours(2).
                 toInstant(ZoneOffset.of("-03:00"));
     }
+    @Override
+    public Instant getExpirationDate(String token) {
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
+
+        return JWT.require(algorithm)
+                .withIssuer("wefood-profile-ms")
+                .build()
+                .verify(token)
+                .getExpiresAtAsInstant();
+    }
 }

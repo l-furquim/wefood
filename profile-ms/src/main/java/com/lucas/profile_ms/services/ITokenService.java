@@ -9,5 +9,6 @@ public interface ITokenService {
     String generateToken(Profile profile);
     String validateToken(String token);
     Instant getExpirationDate();
+    Instant getExpirationDate(String token);
 
 }

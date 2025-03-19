@@ -1,22 +1,23 @@
 server:
   port: 8083
-eureka:
-  instance:
-      prefer-ip-address: true
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8084/eureka/
+#eureka:
+#  instance:
+#      prefer-ip-address: true
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://localhost:8084/eureka/
 spring:
   cloud:
     # Habilitar o discovery (Mostrar as instancias)
     discovery:
-      enabled: true
+      enabled: false
       # Desabilita o config server (Configs em outro repo)
     config:
       uri: http://127.0.0.1:8889
       enabled: false
+
   application:
     name: profile-ms
   redis:
