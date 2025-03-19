@@ -19,24 +19,22 @@ public class ProfileClientService {
     }
 
     public String getUserEmail(String userId){
-        final String[] email = {""};
+        var email = "";
 
-        new Thread(){
-            @Override
-            public void run(){
-                try{
-                    String token = redisTemplate.opsForValue().get(userId);
+        try{
+            String token = redisTemplate.opsForValue().get(userId);
 
+            log.info("Token recebido do redis: {}", token);
 
-                    email[0] = profileClient.getUserEmail(userId, token).getBody();
-                }catch (Exception e){
-                    log.info("Erro ao buscar o email no client " + e.getMessage());
-                }
-            }
+            var body = profileClient.getUserEmail(userId, token).getBody();
+            log.info("Response recebida do client {}",body);
 
-        }.start();
+            email = body;
 
-        return email[0];
+        }catch (Exception e) {
+            log.info("Erro ao buscar o email no client " + e.getMessage());
+        }
+        return email;
     }
 
 }

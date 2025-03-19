@@ -3,6 +3,7 @@ package com.lucas.pedido_ms.handlers;
 import com.lucas.pedido_ms.domains.order.exception.InvalidOrderCreationException;
 import com.lucas.pedido_ms.domains.order.exception.InvalidOrderUpdateException;
 import com.lucas.pedido_ms.domains.order.exception.OrderNotFoundException;
+import com.lucas.pedido_ms.domains.order.exception.SendingOrderMailException;
 import com.lucas.pedido_ms.domains.orderitem.exception.InvalidOrderItemDataException;
 import com.lucas.pedido_ms.domains.orderitem.exception.OrderItemNotFoundException;
 import com.lucas.pedido_ms.handlers.dto.CustomErrorResponse;
@@ -87,5 +88,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
         return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
     }
 
+    @ExceptionHandler({SendingOrderMailException.class })
+    private ResponseEntity<Object> sendingOrderMail(Exception e, HttpServletRequest request){
+        CustomErrorResponse errorResponse = new CustomErrorResponse();
 
+        errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        errorResponse.setError(e.getMessage());
+        errorResponse.setUrl(request.getRequestURI());
+
+        return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
+    }
 }

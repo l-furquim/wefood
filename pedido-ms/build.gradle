@@ -36,7 +36,7 @@ dependencies {
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client', version: '4.2.0'
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-config', version: '4.2.0'
 	// https://mvnrepository.com/artifact/org.springframework.data/spring-data-redis
-	implementation group: 'org.springframework.data', name: 'spring-data-redis', version: '3.4.4'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.2.0'
 

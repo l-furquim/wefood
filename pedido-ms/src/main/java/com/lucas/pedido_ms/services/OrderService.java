@@ -193,23 +193,35 @@ public class OrderService {
             throw new OrderNotFoundException("Order not found while attempting to update the status " + data.orderId());
         }
 
-        if(data.status().equals(OrderStatus.RECEIVED)){
-            var email = profileClientService.getUserEmail(order.get().getUserId());
-
-            if(!email.isEmpty()){
-                mailTemplate.send(
-                        MAIL_TOPIC,
-                        new SendOrderMailDto(
-                            email,
-                                "furquimmsw@gmail.com",
-                                "Pedido recebido com sucesso - " + order.get().getId(),
-                                "Olá ! \n Agradecemos por realizar um pedido no we-food, esperamos que tenha uma ótima refeição! ",
-                                order.get().getUserId(),
-                                "ORDER"
-                        )
-                );
-            }
+        if(order.get().getStatus().equals(OrderStatus.WAITING_PAYMENT)){
+            throw new InvalidOrderUpdateException("The order hasn't been payed");
         }
+
+        if(data.status().equals(OrderStatus.RECEIVED)){
+            // Em uma nova thread pois o processo é relativamente "grande" e o serviço de pedido não pode travar por um email.
+            new Thread(){
+                @Override
+                public void run(){
+                    var email = profileClientService.getUserEmail(order.get().getUserId());
+                    if(!email.isEmpty()) {
+                        mailTemplate.send(
+                                MAIL_TOPIC,
+                                new SendOrderMailDto(
+                                        email,
+                                        "furquimmsw@gmail.com",
+                                        "Pedido recebido com sucesso - " + order.get().getId(),
+                                        "Olá ! \n Agradecemos por realizar um pedido no we-food, esperamos que tenha uma ótima refeição! ",
+                                        order.get().getUserId(),
+                                        "ORDER"
+                                    )
+                            );
+                        }
+                    order.get().setStatus(OrderStatus.RECEIVED);
+                    orderRepository.save(order.get());
+                    }
+            }.start();
+        }
+
         return order.get();
     }
 

@@ -1,17 +1,17 @@
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8084/eureka/
-  instance:
-    prefer-ip-address: true
+#eureka:
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://localhost:8084/eureka/
+#  instance:
+#    prefer-ip-address: true
 server:
   port: 8080
 spring:
   cloud:
     discovery:
-      enabled: true
+      enabled: false
       # Desabilita o config server (Configs em outro repo)
     config:
       uri: http://127.0.0.1:8889
@@ -23,6 +23,9 @@ spring:
     username: root
     password: root
     driver-class-name: org.postgresql.Driver
+  redis:
+      host: localhost
+      port: 6379
   jpa:
     show-sql: false
     hibernate:
@@ -30,3 +33,8 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+feign:
+  client:
+    profile:
+      url: http://localhost:8083/v1/api/profiles/
+
