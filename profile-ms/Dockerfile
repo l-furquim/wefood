@@ -3,5 +3,6 @@ WORKDIR /app
 COPY . /app
 RUN mvn clean package -f /app/pom.xml
 FROM openjdk:17
-COPY --from=build /app/target/*.jar payment-ms.jar
-ENTRYPOINT ["java", "-jar", "payment-ms.jar"]
+COPY --from=build /app/target/*.jar profile-ms.jar
+ENTRYPOINT ["java", "-jar", "profile-ms.jar"]
+

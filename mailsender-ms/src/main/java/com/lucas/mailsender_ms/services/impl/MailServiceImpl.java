@@ -3,6 +3,7 @@ package com.lucas.mailsender_ms.services.impl;
 import com.lucas.mailsender_ms.domains.mail.Mail;
 import com.lucas.mailsender_ms.domains.mail.dto.DeleteMailDto;
 import com.lucas.mailsender_ms.domains.mail.dto.SendMailDto;
+import com.lucas.mailsender_ms.domains.mail.enums.MailType;
 import com.lucas.mailsender_ms.domains.mail.exceptions.ErrorWhileSendingMail;
 import com.lucas.mailsender_ms.domains.mail.exceptions.InvalidDataCreateMail;
 import com.lucas.mailsender_ms.domains.mail.exceptions.MailNotFoundException;
@@ -33,15 +34,31 @@ public class MailServiceImpl implements IMailService {
     private String url;
 
     private static final Pattern CODE_PATTERN = Pattern.compile("Aqui seu código: (\\d{5})");
+    private static final Pattern ORDER_ID_PATTERN = Pattern.compile("Pedido recebido com sucesso - (\\d+)");
 
     @Override
     public void send(SendMailDto data) {
         validateSendMailDto(data);
 
         var mail = saveMail(data);
-        String code = extractCodeFromContent(data.content());
 
-        sendEmail(data.from(), data.to(), data.subject(), getHtmlTemplate(data.to(), code));
+        String emailTemplate = "";
+
+        if(data.type().equals(MailType.PROFILE)){
+            String code = extractCodeFromContent(data.content());
+            emailTemplate = getEmailHtmlTemplate(data.to(), code);
+        }
+
+        if (data.type().equals(MailType.PAYMENT)){
+            emailTemplate = getPaymentHtmlTemplate(data.content());
+        }
+
+        if(data.type().equals(MailType.ORDER)){
+            String orderId = extractOrderIdFromSubject(data.subject());
+            emailTemplate = getOrderHtmlTemplate(data.content(),orderId);
+        }
+
+        sendEmail(data.from(), data.to(), data.subject(),emailTemplate);
 
         log.info("Email enviado com sucesso. {}", mail);
     }
@@ -99,6 +116,15 @@ public class MailServiceImpl implements IMailService {
         return matcher.group(1);
     }
 
+    private String extractOrderIdFromSubject(String subject){
+        Matcher matcher = ORDER_ID_PATTERN.matcher(subject);
+        if (!matcher.find()) {
+            throw new ErrorWhileSendingMail("Could not send the email, the regex pattern did not find the order id");
+        }
+        return matcher.group(1);
+    }
+
+
     private void sendEmail(String from, String to, String subject, String htmlContent) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -116,7 +142,7 @@ public class MailServiceImpl implements IMailService {
         }
     }
 
-    private String getHtmlTemplate(String email, String code) {
+    private String getEmailHtmlTemplate(String email, String code) {
         String formattedUrl = url.concat("confirm/" + code + "/" + email);
 
         log.info("String formatada {}", formattedUrl);
@@ -190,6 +216,138 @@ public class MailServiceImpl implements IMailService {
                 </body>
                 </html>
                 """, formattedUrl
+        );
+    }
+
+    private String getPaymentHtmlTemplate(String content) {
+        return String.format(
+                """
+                        <!DOCTYPE html>
+                        <html lang="pt-br">
+                        <head>
+                          <meta charset="UTF-8">
+                          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                          <title>Confirmação do pagamento</title>
+                          <style>
+                            body {
+                              font-family: Arial, sans-serif;
+                              background-color: #f2f2f2;
+                              margin: 0;
+                              padding: 0;
+                              display: flex;
+                              justify-content: center;
+                              align-items: center;
+                              height: 100vh;
+                            }
+                            .container {
+                              background-color: #fff;
+                              padding: 40px;
+                              border-radius: 8px;
+                              box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                              max-width: 600px;
+                              width: 100%%;
+                              text-align: center;
+                            }
+                            h1 {
+                              color: #3C2A21;
+                            }
+                            p {
+                              font-size: 16px;
+                              color: #555;
+                            }
+                            .code {
+                              display: inline-block;
+                              padding: 15px 30px;
+                              font-size: 24px;
+                              font-weight: bold;
+                              background-color: #3C2A21;
+                              color: #fff;
+                              border-radius: 5px;
+                              margin: 20px 0;
+                            }
+                            .footer {
+                              font-size: 12px;
+                              color: #888;
+                              margin-top: 20px;
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="container">
+                            <h1>Pagamento confirmado - Wefood</h1>
+                            <p>%s</p>
+                            <p>Este código é válido por 15 minutos.</p>
+                            <div class="footer">
+                              <p>Se não foi você que realizou essa transação, por favor entre em contato conosco</p>
+                            </div>
+                          </div>
+                        </body>
+                        </html>
+                        """, content
+        );
+    }
+
+    private String getOrderHtmlTemplate(String content, String orderId) {
+        return String.format(
+                """
+                        <!DOCTYPE html>
+                        <html lang="pt-br">
+                        <head>
+                          <meta charset="UTF-8">
+                          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                          <title>Confirmação do pedido</title>
+                          <style>
+                            body {
+                              font-family: Arial, sans-serif;
+                              background-color: #f2f2f2;
+                              margin: 0;
+                              padding: 0;
+                              display: flex;
+                              justify-content: center;
+                              align-items: center;
+                              height: 100vh;
+                            }
+                            .container {
+                              background-color: #fff;
+                              padding: 40px;
+                              border-radius: 8px;
+                              box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                              max-width: 600px;
+                              width: 100%%;
+                              text-align: center;
+                            }
+                            h1 {
+                              color: #3C2A21;
+                            }
+                            p {
+                              font-size: 16px;
+                              color: #555;
+                            }
+                            .code {
+                              display: inline-block;
+                              padding: 15px 30px;
+                              font-size: 24px;
+                              font-weight: bold;
+                              background-color: #3C2A21;
+                              color: #fff;
+                              border-radius: 5px;
+                              margin: 20px 0;
+                            }
+                            .footer {
+                              font-size: 12px;
+                              color: #888;
+                              margin-top: 20px;
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="container">
+                            <h1>Seu pedido chegou - Wefood</h1>
+                            <p>%s</p>
+                          </div>
+                        </body>
+                        </html>
+                        """, content
         );
     }
 }

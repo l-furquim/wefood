@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@FeignClient("profile-ms")
+// Alterar o nome para o nome do ms do eureka e substituir url para path
+@FeignClient(name="profileClient",url = "${feign.client.profile.url}")
 public interface ProfileClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/v1/api/profiles/{userId}")

@@ -13,6 +13,7 @@ import com.lucas.payment_ms.repositories.AccountRepository;
 import com.lucas.payment_ms.repositories.TransactionRepository;
 import com.lucas.payment_ms.services.IProfileClientService;
 import com.lucas.payment_ms.services.ITransactionService;
+import lombok.SneakyThrows;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -155,7 +156,27 @@ public class TransactionService implements ITransactionService {
     }
 
     private void sendPaymentConfirmation(Transaction transaction, Long orderId, String userId){
-        String email = profileClientService.getEmail(userId);
+        // Em uma nova thread pois o processo é relativamente "grande" e o serviço de pedido não pode travar por um email.
+        new Thread(){
+            @SneakyThrows
+            @Override
+            public void run(){
+                String email = profileClientService.getEmail(userId);
+
+                emailKafkaTemplate.send(
+                        EMAIL_TOPIC,
+                        new SendPaymentConfirmationEmailDto(
+                                email,
+                                "furquimmsw@gmail.com",
+                                "Pagamento do pedido - " +  orderId + "confirmado",
+                                "Olá ! \n Viemos informar que o pagamento referente ao pedido " + orderId + "foi confirmado no nosso sistema, no valor de: R$ " + transaction.getValue().toPlainString(),
+                                userId,
+                                "PAYMENT"
+
+                        )
+                );
+            }
+        }.start();
 
         orderTemplate.send(ORDER_TOPIC, new SendPaymentResponseDto(
                 true,
@@ -169,19 +190,6 @@ public class TransactionService implements ITransactionService {
                         "Pagamento do pedido efetuado com sucesso",
                         null,
                         "PAYMENT"
-                )
-        );
-
-        emailKafkaTemplate.send(
-                EMAIL_TOPIC,
-                new SendPaymentConfirmationEmailDto(
-                    email,
-                    "furquimmsw@gmail.com",
-                        "Pagamento do pedido - " +  orderId + "confirmado",
-                        "Olá ! \n Viemos informar que o pagamento referente ao pedido " + orderId + "foi confirmado no nosso sistema, no valor de: R$ " + transaction.getValue().toPlainString(),
-                        userId,
-                        "PAYMENT"
-
                 )
         );
 

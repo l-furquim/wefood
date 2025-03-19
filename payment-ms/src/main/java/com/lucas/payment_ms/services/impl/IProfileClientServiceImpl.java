@@ -21,22 +21,16 @@ public class IProfileClientServiceImpl implements IProfileClientService {
 
     @Override
     public String getEmail(String userId) {
-        final String[] email = {""};
+        var email = "";
 
-         new Thread(){
-            @SneakyThrows
-            @Override
-            public void run(){
-                try{
-                    String token = redisTemplate.opsForValue().get(userId);
+        try{
+            String token = redisTemplate.opsForValue().get(userId);
 
-                    email[0] = profileClient.getUserEmail(userId, token).getBody();
-                }catch (Exception e){
-                    log.error("Erro ao buscar o email do usuario no payment-ms {}", e.getMessage());
-                }
-            }
-        }.start();
+            email = profileClient.getUserEmail(userId, token).getBody();
+        }catch (Exception e){
+            log.error("Erro ao buscar o email do usuario no payment-ms {}", e.getMessage());
+        }
 
-        return email[0];
+        return email;
     }
 }
