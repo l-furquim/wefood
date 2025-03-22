@@ -1,15 +1,19 @@
 server:
   port: 8084
-
 spring:
+  cloud:
+    config:
+      uri: http://127.0.0.1:8889
+      enabled: false
   application:
     name: discovery-ms
-
-
 eureka:
-  instance:
-    hostname: localhost
   client:
     register-with-eureka: false
     fetch-registry: false
+  server:
+    enable-self-preservation: false # Para o ambiente local
+    wait-time-in-ms-when-sync-empty: 0
+    servlet:
+      context-path: /
 

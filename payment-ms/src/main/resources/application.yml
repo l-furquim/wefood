@@ -22,12 +22,12 @@ spring:
   application:
     name: payment-ms
   datasource:
-    url: jdbc:postgresql://localhost:5432/wefood
+    url: jdbc:postgresql://postgres:5432/wefood
     username: root
     password: root
     driver-class-name: org.postgresql.Driver
   redis:
-      host: localhost
+      host: redis
       port: 6379
   jpa:
     show-sql: false

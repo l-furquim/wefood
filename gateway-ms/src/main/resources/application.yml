@@ -1,0 +1,21 @@
+server:
+  port: 8086
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8084/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+spring:
+  application:
+    name: gateway-ms
+  cloud:
+    discovery:
+      enabled: true
+    config:
+      uri: http://127.0.0.1:8889
+      enabled: false
