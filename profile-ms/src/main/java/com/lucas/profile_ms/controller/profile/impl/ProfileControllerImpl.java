@@ -1,4 +1,4 @@
-package com.lucas.profile_ms.controller.impl;
+package com.lucas.profile_ms.controller.profile.impl;
 
 import com.lucas.profile_ms.domains.profile.Profile;
 import com.lucas.profile_ms.domains.profile.dto.AuthProfileDto;
