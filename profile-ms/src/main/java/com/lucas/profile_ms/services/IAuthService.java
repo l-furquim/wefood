@@ -7,5 +7,4 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 public interface IAuthService extends UserDetailsService {
 
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
-
 }

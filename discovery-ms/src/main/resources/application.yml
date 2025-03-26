@@ -9,11 +9,6 @@ spring:
     name: discovery-ms
 eureka:
   client:
-    register-with-eureka: false
+    register-with-eureka: true
     fetch-registry: false
-  server:
-    enable-self-preservation: false # Para o ambiente local
-    wait-time-in-ms-when-sync-empty: 0
-    servlet:
-      context-path: /
 

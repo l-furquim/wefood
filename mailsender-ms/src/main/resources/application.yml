@@ -1,19 +1,19 @@
-#eureka:
-#  client:
-#    register-with-eureka: true
-#    fetch-registry: true
-#    service-url:
-#      # onde o eureka ta rodando
-#      defaultZone: http://localhost:8084/eureka/
-#  instance:
-#    prefer-ip-address: true
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      # onde o eureka ta rodando
+      defaultZone: http://localhost:8084/eureka/
+  instance:
+    prefer-ip-address: true
 server:
   port: 8085
 spring:
   cloud:
     # Habilitar o discovery (Mostrar as instancias)
     discovery:
-      enabled: false
+      enabled: true
       # Desabilita o config server (Configs em outro repo)
     config:
       uri: http://127.0.0.1:8889
@@ -21,7 +21,7 @@ spring:
   application:
     name: mailsender-ms
   datasource:
-    url: jdbc:postgresql://localhost:5432/wefood
+    url: jdbc:postgresql://wefood-postgres:5432/wefood
     username: root
     password: root
     driver-class-name: org.postgresql.Driver

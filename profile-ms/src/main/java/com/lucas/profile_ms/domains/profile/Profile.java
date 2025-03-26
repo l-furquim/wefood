@@ -36,9 +36,9 @@ public class Profile implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(this.type == ProfileType.WAITING_CONFIRMATION)return List.of();
+        if(this.type == ProfileType.WAITING_CONFIRMATION)return List.of(new SimpleGrantedAuthority("WAITING_CONFIRMATION_ROLE"));
 
-        if(this.type == ProfileType.RESTAURANT) return List.of(new SimpleGrantedAuthority("ROLE_RESTAURANT"));
+//        if(this.type == ProfileType.RESTAURANT) return List.of(new SimpleGrantedAuthority("ROLE_RESTAURANT"));
         else return List.of(new SimpleGrantedAuthority("ROLE_COMUM"));
     }
 
