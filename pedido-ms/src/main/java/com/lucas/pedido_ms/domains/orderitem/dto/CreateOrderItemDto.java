@@ -8,7 +8,7 @@ public record CreateOrderItemDto(
         String description,
         Long quantity,
         BigDecimal price,
-//        Long orderId,
+        Long restaurantId,
         String userId
     ) {
 }

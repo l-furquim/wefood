@@ -46,4 +46,11 @@ public class OrderItemController  implements IOrderItemController {
     public ResponseEntity<List<OrderItem>> get(){
         return ResponseEntity.ok().body(orderItemService.get());
     }
+
+    @GetMapping("/{restaurantId}")
+    public ResponseEntity<List<OrderItem>> getByRestaurantId(@PathVariable("restaurantId") Long restaurantId){
+        var restaurants = this.orderItemService.findByRestaurant(restaurantId);
+
+        return ResponseEntity.ok().body(restaurants);
+    }
 }

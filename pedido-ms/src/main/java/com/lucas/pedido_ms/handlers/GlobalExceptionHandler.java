@@ -6,6 +6,7 @@ import com.lucas.pedido_ms.domains.order.exception.OrderNotFoundException;
 import com.lucas.pedido_ms.domains.order.exception.SendingOrderMailException;
 import com.lucas.pedido_ms.domains.orderitem.exception.InvalidOrderItemDataException;
 import com.lucas.pedido_ms.domains.orderitem.exception.OrderItemNotFoundException;
+import com.lucas.pedido_ms.domains.orderitem.exception.OrderItemRestaurantNotFound;
 import com.lucas.pedido_ms.handlers.dto.CustomErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
@@ -93,6 +94,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
         CustomErrorResponse errorResponse = new CustomErrorResponse();
 
         errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        errorResponse.setError(e.getMessage());
+        errorResponse.setUrl(request.getRequestURI());
+
+        return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler({OrderItemRestaurantNotFound.class })
+    private ResponseEntity<Object> orderItemRestaurantNotFound(Exception e, HttpServletRequest request){
+        CustomErrorResponse errorResponse = new CustomErrorResponse();
+
+        errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
         errorResponse.setError(e.getMessage());
         errorResponse.setUrl(request.getRequestURI());
 

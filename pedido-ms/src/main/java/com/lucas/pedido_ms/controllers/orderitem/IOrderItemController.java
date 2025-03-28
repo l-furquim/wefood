@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -48,5 +49,12 @@ public interface IOrderItemController {
             @ApiResponse(responseCode = "500", description = "Erro não mapeado", content = @Content)
     })
     public ResponseEntity<List<OrderItem>> get() throws Exception;
+
+    @Operation(summary = "Pega todos os items de pedido relacionados a um restaurante")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Items encontrados com sucesso"),
+            @ApiResponse(responseCode = "500", description = "Erro não mapeado", content = @Content)
+    })
+    public ResponseEntity<List<OrderItem>> getByRestaurantId(@PathVariable("restaurantId") Long restaurantId) throws Exception;
 
 }

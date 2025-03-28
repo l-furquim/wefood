@@ -26,16 +26,19 @@ public class OrderItem {
     @ManyToOne
     private Order order;
 
+    @Column(name = "restaurant_id")
+    private Long restaurantId;
 
     public OrderItem(){
 
     }
 
-    public OrderItem(String title, String description, Long quantity, BigDecimal price) {
+    public OrderItem(String title, String description, Long quantity, BigDecimal price, Long restaurantId) {
         this.title = title;
         this.description = description;
         this.quantity = quantity;
         this.price = price;
+        this.restaurantId = restaurantId;
     }
 
     public Long getId() {
@@ -72,6 +75,14 @@ public class OrderItem {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public Long getRestaurantId() {
+        return restaurantId;
+    }
+
+    public void setRestaurantId(Long restaurantId) {
+        this.restaurantId = restaurantId;
     }
 
     public Order getOrder() {

@@ -36,5 +36,4 @@ spring:
 feign:
   client:
     profile:
-      url: http://localhost:8083/v1/api/profiles/
-
+      url: http://localhost:8083/

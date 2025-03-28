@@ -45,4 +45,15 @@ public class RestaurantControllerImpl {
 
         return ResponseEntity.ok().body(accounts);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Restaurant> getById(@PathVariable("id") Long id){
+        var restaurant = restaurantService.findById(id);
+
+        if(restaurant == null){
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok().body(restaurant);
+    }
 }

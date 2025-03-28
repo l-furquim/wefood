@@ -21,10 +21,12 @@ public class OrderItemService {
     private static final Logger log = LoggerFactory.getLogger(OrderItemService.class);
     private final OrderItemRepository orderItemRepository;
     private final OrderService orderService;
+    private final IRestaurantService restaurantService;
 
-    public OrderItemService(OrderItemRepository orderItemRepository, OrderService orderService) {
+    public OrderItemService(OrderItemRepository orderItemRepository, OrderService orderService, IRestaurantService restaurantService) {
         this.orderItemRepository = orderItemRepository;
         this.orderService = orderService;
+        this.restaurantService = restaurantService;
     }
 
     public OrderItem create(CreateOrderItemDto data){
@@ -33,11 +35,18 @@ public class OrderItemService {
             throw new InvalidOrderItemDataException("Error creating the order item: invalid data");
         }
 
+        var restaurant = restaurantService.getById(data.restaurantId());
+
+        if(restaurant == null){
+            throw new OrderItemNotFoundException("Could not found the restaurant for the order item creation");
+        }
+
         var orderItem = new OrderItem(
                 data.title(),
                 data.description(),
                 data.quantity(),
-                data.price()
+                data.price(),
+                data.restaurantId()
         );
 
 //        if(data.orderId() != null){
@@ -87,7 +96,11 @@ public class OrderItemService {
         return orderItemRepository.findAll();
     }
 
-    public OrderItem findById(Long id){
+    public OrderItem findById(Long id) {
         return orderItemRepository.findById(id).orElseThrow(() -> new OrderItemNotFoundException("Cannot found the order item by id"));
+    }
+    
+    public List<OrderItem> findByRestaurant(Long restaurantId){
+        return this.orderItemRepository.findByRestaurantId(restaurantId);
     }
 }
