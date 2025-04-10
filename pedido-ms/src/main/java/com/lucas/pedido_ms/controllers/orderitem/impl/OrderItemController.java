@@ -2,12 +2,11 @@ package com.lucas.pedido_ms.controllers.orderitem.impl;
 
 import com.lucas.pedido_ms.controllers.orderitem.IOrderItemController;
 import com.lucas.pedido_ms.domains.orderitem.OrderItem;
-import com.lucas.pedido_ms.domains.orderitem.dto.CreateOrderItemDto;
-import com.lucas.pedido_ms.domains.orderitem.dto.DeleteOrderItemDto;
-import com.lucas.pedido_ms.domains.orderitem.dto.UpdateOrderItemDto;
+import com.lucas.pedido_ms.domains.orderitem.dto.*;
 import com.lucas.pedido_ms.services.OrderItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,9 +20,15 @@ public class OrderItemController  implements IOrderItemController {
         this.orderItemService = orderItemService;
     }
 
-    @PostMapping
-    public ResponseEntity<OrderItem> create(@RequestBody CreateOrderItemDto data){
-        var orderItem = orderItemService.create(data);
+    @PostMapping(consumes = "multipart/form-data")
+    public ResponseEntity<OrderItem> create(
+            @RequestPart("orderItemMetaData") CreateOrderItemMetadataDto data,
+            @RequestPart("orderItemImage") MultipartFile image
+            ){
+        var orderItem = orderItemService.create(new CreateOrderItemDto(
+                data,
+                image
+        ));
 
         return ResponseEntity.status(201).body(orderItem);
     }
@@ -48,7 +53,7 @@ public class OrderItemController  implements IOrderItemController {
     }
 
     @GetMapping("/{restaurantId}")
-    public ResponseEntity<List<OrderItem>> getByRestaurantId(@PathVariable("restaurantId") Long restaurantId){
+    public ResponseEntity<List<FindByRestaurantDto>> getByRestaurantId(@PathVariable("restaurantId") Long restaurantId){
         var restaurants = this.orderItemService.findByRestaurant(restaurantId);
 
         return ResponseEntity.ok().body(restaurants);

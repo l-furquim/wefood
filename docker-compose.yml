@@ -6,9 +6,7 @@ services:
     hostname: redis
     ports:
       - "6379:6379"
-    networks:
-      - wefood-network  
-
+      
   postgres:
     image: postgres:13
     container_name: wefood-postgres
@@ -20,9 +18,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - wefood-network 
-      
+  
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: wefood-zookeeper
@@ -31,8 +27,6 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
-    networks:
-      - wefood-network
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -47,26 +41,8 @@ services:
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - wefood-network  
 
-  mailsender-ms:
-    build:
-      context: ./mailsender-ms
-      dockerfile: Dockerfile
-    image: furqas/wefood-mailsender:latest 
-    depends_on:
-      - postgres
-      - kafka
-      - zookeeper
-    ports:
-      - "8085:8085"
-    networks:
-      - wefood-network
 volumes:
   postgres_data:
   redis_data:
-networks:
-  wefood-network:
-    driver: bridge
-
+  

@@ -1,9 +1,7 @@
 package com.lucas.pedido_ms.services;
 
 import com.lucas.pedido_ms.domains.orderitem.OrderItem;
-import com.lucas.pedido_ms.domains.orderitem.dto.CreateOrderItemDto;
-import com.lucas.pedido_ms.domains.orderitem.dto.DeleteOrderItemDto;
-import com.lucas.pedido_ms.domains.orderitem.dto.UpdateOrderItemDto;
+import com.lucas.pedido_ms.domains.orderitem.dto.*;
 import com.lucas.pedido_ms.domains.orderitem.exception.InvalidOrderItemDataException;
 import com.lucas.pedido_ms.domains.orderitem.exception.OrderItemNotFoundException;
 import com.lucas.pedido_ms.repositories.OrderItemRepository;
@@ -11,8 +9,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,32 +29,43 @@ public class OrderItemService {
     private final OrderItemRepository orderItemRepository;
     private final OrderService orderService;
     private final IRestaurantService restaurantService;
+    private final S3Client s3Client;
+    private static final String BUCKET = "furqas-wefood-buckets";
 
-    public OrderItemService(OrderItemRepository orderItemRepository, OrderService orderService, IRestaurantService restaurantService) {
+    public OrderItemService(
+            OrderItemRepository orderItemRepository,
+            OrderService orderService,
+            IRestaurantService restaurantService,
+            S3Client s3Client
+    ) {
         this.orderItemRepository = orderItemRepository;
         this.orderService = orderService;
         this.restaurantService = restaurantService;
+        this.s3Client = s3Client;
     }
 
-    public OrderItem create(CreateOrderItemDto data){
-        if(data.title() == null || data.title().isEmpty() || data.description() == null || data.description().isEmpty() ||
-            data.price().compareTo(BigDecimal.ZERO) < 0 || data.quantity() <= 0 || data.userId() == null || data.userId().isEmpty()){
+    public OrderItem create(CreateOrderItemDto dto){
+        if(dto.data().title() == null || dto.data().title().isEmpty() || dto.data().description() == null || dto.data().description().isEmpty() ||
+            dto.data().price().compareTo(BigDecimal.ZERO) < 0 || dto.data().quantity() <= 0 || dto.data().userId() == null || dto.data().userId().isEmpty()){
             throw new InvalidOrderItemDataException("Error creating the order item: invalid data");
         }
 
-        var restaurant = restaurantService.getById(data.restaurantId());
+        var restaurant = restaurantService.getById(dto.data().restaurantId());
 
         if(restaurant == null){
             throw new OrderItemNotFoundException("Could not found the restaurant for the order item creation");
         }
 
         var orderItem = new OrderItem(
-                data.title(),
-                data.description(),
-                data.quantity(),
-                data.price(),
-                data.restaurantId()
+                dto.data().title(),
+                dto.data().description(),
+                dto.data().quantity(),
+                dto.data().price(),
+                dto.data().restaurantId()
         );
+
+        saveOrderItemImage(dto.image(), restaurant.getBody().id(),orderItem.getId());
+
 
 //        if(data.orderId() != null){
 //            var order = orderService.findById(data.orderId());
@@ -100,7 +118,83 @@ public class OrderItemService {
         return orderItemRepository.findById(id).orElseThrow(() -> new OrderItemNotFoundException("Cannot found the order item by id"));
     }
     
-    public List<OrderItem> findByRestaurant(Long restaurantId){
-        return this.orderItemRepository.findByRestaurantId(restaurantId);
+    public List<FindByRestaurantDto>  findByRestaurant(Long restaurantId){
+        var orderItems = this.orderItemRepository.findByRestaurantId(restaurantId);
+        
+        var orderItemsImagesPath = getRestaurantOrdersItemImagePath(restaurantId);
+        
+        List<FindByRestaurantDto> itemsWithImageList = new ArrayList<>();
+
+        for (OrderItem orderItem : orderItems) {
+            var paths = orderItemsImagesPath.stream().filter(
+                    p -> p.contains(
+                            String.format(
+                                    "%d/images/%d",
+                                    restaurantId,
+                                    orderItem.getId()
+                            )
+                    )
+            ).toList();
+
+
+            if(!paths.isEmpty()){
+                itemsWithImageList.add(
+                        new FindByRestaurantDto(
+                                orderItem,
+                                paths
+                        )
+                );
+                continue;
+            }
+            itemsWithImageList.add(
+                    new FindByRestaurantDto(
+                            orderItem,
+                            new ArrayList<>()
+                    )
+            );
+        }
+        return itemsWithImageList;
+    }
+
+    private List<String> getRestaurantOrdersItemImagePath(Long restaurantId){
+        List<String> imagesPath = new ArrayList<>();
+
+        ListObjectsV2Request objectsListRequest = ListObjectsV2Request.builder()
+                .bucket(BUCKET)
+                .prefix(restaurantId + "/images/")
+                .build();
+
+        ListObjectsV2Response objectsListResponse = s3Client.listObjectsV2(objectsListRequest);
+
+        List<S3Object> imagesList = objectsListResponse.contents();
+
+        for (S3Object s3Object : imagesList) {
+            imagesPath.add(s3Object.key());
+        }
+
+        return imagesPath;
+    }
+
+    private void saveOrderItemImage(MultipartFile image, Long resturantId, Long orderItemId){
+        new Thread(() -> {
+            try{
+                var imageBytes = image.getBytes();
+
+                PutObjectRequest put = PutObjectRequest.builder()
+                        .bucket(BUCKET)
+                        .key(resturantId + "/images/" + orderItemId + "/" + image.getName())
+                        .build();
+
+                s3Client.putObject(
+                        put,
+                        RequestBody.fromBytes(
+                                imageBytes
+                        )
+                );
+
+            }catch (IOException e){
+                log.error("Erro ao salvar imagem do item de pedido " + e.getMessage());
+            }
+        });
     }
 }
