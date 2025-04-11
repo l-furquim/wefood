@@ -1,6 +1,7 @@
 package com.lucas.profile_ms.controller.restaurant.impl;
 
 
+import com.lucas.profile_ms.controller.restaurant.IRestaurantController;
 import com.lucas.profile_ms.domains.profile.dto.ConfirmCodeDto;
 import com.lucas.profile_ms.domains.restaurant.Restaurant;
 import com.lucas.profile_ms.domains.restaurant.dto.CreateRestaurantDto;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("v1/api/restaurants")
-public class RestaurantControllerImpl {
+public class RestaurantControllerImpl implements IRestaurantController {
 
     private final IRestaurantService restaurantService;
 
@@ -21,7 +22,7 @@ public class RestaurantControllerImpl {
     }
 
     @PostMapping
-    public ResponseEntity<Restaurant> create(@RequestBody CreateRestaurantDto data){
+    public ResponseEntity<Restaurant> createConfirmation(@RequestBody CreateRestaurantDto data){
         var restaurant = restaurantService.createConfirmation(data);
 
         return ResponseEntity.status(201).body(restaurant);

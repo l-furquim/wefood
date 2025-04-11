@@ -1,5 +1,6 @@
 package com.lucas.profile_ms.controller.profile.impl;
 
+import com.lucas.profile_ms.controller.profile.IProfileController;
 import com.lucas.profile_ms.domains.profile.Profile;
 import com.lucas.profile_ms.domains.profile.dto.AuthProfileDto;
 import com.lucas.profile_ms.domains.profile.dto.ConfirmCodeDto;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("v1/api/profiles")
-public class ProfileControllerImpl {
+public class ProfileControllerImpl implements IProfileController{
 
     private final IProfileService profileService;
 

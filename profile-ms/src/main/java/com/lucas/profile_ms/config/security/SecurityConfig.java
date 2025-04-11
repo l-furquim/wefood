@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
@@ -39,6 +41,14 @@ public class SecurityConfig {
                         authorize -> authorize.requestMatchers(
                                 HttpMethod.POST, "/v1/api/profiles/auth").permitAll()
                                 // Autoriza todas as outras rotas apenas autenticadas
+                                    )
+                .authorizeHttpRequests(
+                        authorize -> authorize.requestMatchers(
+                                        HttpMethod.POST, "/swagger-ui/index.html").permitAll()
+                )
+                .authorizeHttpRequests(
+                        authorize -> authorize.requestMatchers(
+                                HttpMethod.GET, "/swagger-ui/index.html").permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(
                         securityFilter, UsernamePasswordAuthenticationFilter.class
