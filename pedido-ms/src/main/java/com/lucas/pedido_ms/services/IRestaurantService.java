@@ -17,9 +17,9 @@ public class IRestaurantService  {
         this.restaurantClient = restaurantClient;
     }
 
-    public ResponseEntity<RestaurantDto> getById(Long id) {
+    public ResponseEntity<RestaurantDto> getById(Long id,String token) {
         try{
-            return restaurantClient.getById(id);
+            return restaurantClient.getById(id, token);
         }catch (Exception e){
             log.error("Erro ao buscar o restaurant pelo id no client " + e.getMessage());
         }

@@ -6,11 +6,13 @@ import com.lucas.profile_ms.domains.profile.dto.ConfirmCodeDto;
 import com.lucas.profile_ms.domains.restaurant.Restaurant;
 import com.lucas.profile_ms.domains.restaurant.dto.CreateRestaurantDto;
 import com.lucas.profile_ms.services.IRestaurantService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("v1/api/restaurants")
 public class RestaurantControllerImpl implements IRestaurantController {
@@ -40,16 +42,18 @@ public class RestaurantControllerImpl implements IRestaurantController {
         return ResponseEntity.ok().body(restaurantService.getAll());
     }
 
-    @GetMapping("/{domainEmail}")
+    @GetMapping("/email/{domainEmail}")
     public ResponseEntity<List<Restaurant>> getEmail(@PathVariable("domainEmail")String domainEmail){
         var accounts = restaurantService.getAllBranchAccounts(domainEmail);
 
         return ResponseEntity.ok().body(accounts);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<Restaurant> getById(@PathVariable("id") Long id){
         var restaurant = restaurantService.findById(id);
+
+        log.info("Restaurante encontrado: {}", restaurant);
 
         if(restaurant == null){
             return ResponseEntity.notFound().build();

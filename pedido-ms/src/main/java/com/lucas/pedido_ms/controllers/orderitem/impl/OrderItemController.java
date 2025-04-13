@@ -20,10 +20,10 @@ public class OrderItemController  implements IOrderItemController {
         this.orderItemService = orderItemService;
     }
 
-    @PostMapping(consumes = "multipart/form-data")
+    @PostMapping
     public ResponseEntity<OrderItem> create(
-            @RequestPart("orderItemMetaData") CreateOrderItemMetadataDto data,
-            @RequestPart("orderItemImage") MultipartFile image
+            @RequestPart CreateOrderItemMetadataDto data,
+            @RequestPart MultipartFile image
             ){
         var orderItem = orderItemService.create(new CreateOrderItemDto(
                 data,

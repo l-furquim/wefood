@@ -27,32 +27,29 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers(
-                                HttpMethod.POST, "/v1/api/profiles").permitAll()
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorize -> authorize
+                        // Rotas públicas (sem autenticação)
+                        .requestMatchers(
+                                HttpMethod.POST, "/v1/api/profiles"          // Cadastro
+                                      // Autenticação (login)
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET, "/v1/api/profiles/confirm/{code}/{email}" // Confirmação de e-mail
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST, "/v1/api/profiles/auth"
+                        ).permitAll()
+                        // Rotas do Swagger/OpenAPI
+                        .requestMatchers(
+                                "/swagger-ui/**",      // Interface do Swagger
+                                "/v3/api-docs/**",     // Documentação JSON
+                                "/swagger-ui.html"     // Página HTML do Swagger
+                        ).permitAll()
+                        // Todas as outras rotas exigem autenticação
+                        .anyRequest().authenticated()
                 )
-                .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers(
-                                HttpMethod.GET, "/v1/api/profiles/confirm/{code}/{email}").permitAll()
-                )
-                .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers(
-                                HttpMethod.POST, "/v1/api/profiles/auth").permitAll()
-                                // Autoriza todas as outras rotas apenas autenticadas
-                                    )
-                .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers(
-                                        HttpMethod.POST, "/swagger-ui/index.html").permitAll()
-                )
-                .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers(
-                                HttpMethod.GET, "/swagger-ui/index.html").permitAll()
-                                .anyRequest().authenticated())
-                .addFilterBefore(
-                        securityFilter, UsernamePasswordAuthenticationFilter.class
-                )
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

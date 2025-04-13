@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("v1/api/profiles")
+@RequestMapping("/v1/api/profiles")
 public class ProfileControllerImpl implements IProfileController{
 
     private final IProfileService profileService;

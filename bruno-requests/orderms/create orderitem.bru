@@ -1,0 +1,16 @@
+meta {
+  name: create orderitem
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/v1/api/orderitems
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  data: {"title": "string","description": "string","quantity": 2,"price": 10.90,"restaurantId": 1,"userId": "d54d1cb8-921d-453a-a2a1-de30f0e22ab4"} @contentType(application/json)
+  image: @file(/home/furqas/Pictures/Screenshots/Screenshot from 2025-04-12 11-45-53.png)
+}

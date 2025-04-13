@@ -7,18 +7,20 @@ import com.lucas.pedido_ms.domains.orderitem.exception.OrderItemNotFoundExceptio
 import com.lucas.pedido_ms.repositories.OrderItemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,17 +33,20 @@ public class OrderItemService {
     private final IRestaurantService restaurantService;
     private final S3Client s3Client;
     private static final String BUCKET = "furqas-wefood-buckets";
+    private final RedisTemplate<String, String> redisTemplate;
 
     public OrderItemService(
             OrderItemRepository orderItemRepository,
             OrderService orderService,
             IRestaurantService restaurantService,
-            S3Client s3Client
+            S3Client s3Client,
+            RedisTemplate<String, String> redisTemplate
     ) {
         this.orderItemRepository = orderItemRepository;
         this.orderService = orderService;
         this.restaurantService = restaurantService;
         this.s3Client = s3Client;
+        this.redisTemplate = redisTemplate;
     }
 
     public OrderItem create(CreateOrderItemDto dto){
@@ -49,8 +54,9 @@ public class OrderItemService {
             dto.data().price().compareTo(BigDecimal.ZERO) < 0 || dto.data().quantity() <= 0 || dto.data().userId() == null || dto.data().userId().isEmpty()){
             throw new InvalidOrderItemDataException("Error creating the order item: invalid data");
         }
+        var token = redisTemplate.opsForValue().get(dto.data().userId());
 
-        var restaurant = restaurantService.getById(dto.data().restaurantId());
+        var restaurant = restaurantService.getById(dto.data().restaurantId(), token);
 
         if(restaurant == null){
             throw new OrderItemNotFoundException("Could not found the restaurant for the order item creation");
@@ -64,7 +70,9 @@ public class OrderItemService {
                 dto.data().restaurantId()
         );
 
-        saveOrderItemImage(dto.image(), restaurant.getBody().id(),orderItem.getId());
+        var orderItemEntity = orderItemRepository.save(orderItem);
+
+        saveOrderItemImage(dto.image(), restaurant.getBody().id(),orderItemEntity.getId());
 
 
 //        if(data.orderId() != null){
@@ -76,7 +84,7 @@ public class OrderItemService {
 //            orderItem.setOrder(order);
 //        }
 
-        return orderItemRepository.save(orderItem);
+        return orderItemEntity;
     }
 
     @Transactional
@@ -157,8 +165,6 @@ public class OrderItemService {
     }
 
     private List<String> getRestaurantOrdersItemImagePath(Long restaurantId){
-        List<String> imagesPath = new ArrayList<>();
-
         ListObjectsV2Request objectsListRequest = ListObjectsV2Request.builder()
                 .bucket(BUCKET)
                 .prefix(restaurantId + "/images/")
@@ -166,13 +172,10 @@ public class OrderItemService {
 
         ListObjectsV2Response objectsListResponse = s3Client.listObjectsV2(objectsListRequest);
 
+
         List<S3Object> imagesList = objectsListResponse.contents();
 
-        for (S3Object s3Object : imagesList) {
-            imagesPath.add(s3Object.key());
-        }
-
-        return imagesPath;
+        return getPresinedUrl(imagesList);
     }
 
     private void saveOrderItemImage(MultipartFile image, Long resturantId, Long orderItemId){
@@ -195,6 +198,28 @@ public class OrderItemService {
             }catch (IOException e){
                 log.error("Erro ao salvar imagem do item de pedido " + e.getMessage());
             }
-        });
+        }).start();
+    }
+
+    public List<String> getPresinedUrl(List<S3Object> objects) {
+        S3Presigner presigner = S3Presigner.create();
+        List<String> urls = new ArrayList<>();
+
+        for (S3Object obj : objects) {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(BUCKET)
+                    .key(obj.key())
+                    .build();
+
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                    .getObjectRequest(getObjectRequest)
+                    .signatureDuration(Duration.ofMinutes(15)) // tempo de validade da URL
+                    .build();
+
+            URL url = presigner.presignGetObject(presignRequest).url();
+            urls.add(url.toString());
+        }
+
+        return urls;
     }
 }
