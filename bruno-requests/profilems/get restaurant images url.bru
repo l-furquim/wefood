@@ -1,0 +1,15 @@
+meta {
+  name: get restaurant images url
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:8083/v1/api/restaurants/images/5
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ3ZWZvb2QtcHJvZmlsZS1tcyIsInN1YiI6ImZ1cnF1aW1tc3dAZ21haWwuY29tIiwiZXhwIjoxNzQ0NTg4MzgzfQ.nwlGGdk-KrSKJl6iCHqyxo7zL2fs6ivq9zecAdvbgco
+}

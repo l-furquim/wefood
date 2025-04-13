@@ -80,5 +80,6 @@ public class Restaurant implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }
 

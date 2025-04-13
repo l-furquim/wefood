@@ -31,11 +31,18 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // Rotas públicas (sem autenticação)
                         .requestMatchers(
-                                HttpMethod.POST, "/v1/api/profiles"          // Cadastro
-                                      // Autenticação (login)
+                                HttpMethod.POST, "/v1/api/profiles"
                         ).permitAll()
                         .requestMatchers(
-                                HttpMethod.GET, "/v1/api/profiles/confirm/{code}/{email}" // Confirmação de e-mail
+                                HttpMethod.POST, "/v1/api/restaurants"
+                                // Autenticação (login)
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST, "/v1/api/restaurants/confirm/**"
+                                // Autenticação (login)
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET, "/v1/api/profiles/confirm/{code}/{email}"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.POST, "/v1/api/profiles/auth"

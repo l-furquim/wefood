@@ -14,13 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URL;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -167,7 +162,7 @@ public class OrderItemService {
     private List<String> getRestaurantOrdersItemImagePath(Long restaurantId){
         ListObjectsV2Request objectsListRequest = ListObjectsV2Request.builder()
                 .bucket(BUCKET)
-                .prefix(restaurantId + "/images/")
+                .prefix("public/" + restaurantId + "/images/")
                 .build();
 
         ListObjectsV2Response objectsListResponse = s3Client.listObjectsV2(objectsListRequest);
@@ -175,7 +170,7 @@ public class OrderItemService {
 
         List<S3Object> imagesList = objectsListResponse.contents();
 
-        return getPresinedUrl(imagesList);
+        return getUrls(imagesList);
     }
 
     private void saveOrderItemImage(MultipartFile image, Long resturantId, Long orderItemId){
@@ -185,7 +180,7 @@ public class OrderItemService {
 
                 PutObjectRequest put = PutObjectRequest.builder()
                         .bucket(BUCKET)
-                        .key(resturantId + "/images/" + orderItemId + "/" + image.getName())
+                        .key( "public/" + resturantId + "/images/" + orderItemId + "/" + image.getOriginalFilename())
                         .build();
 
                 s3Client.putObject(
@@ -201,23 +196,11 @@ public class OrderItemService {
         }).start();
     }
 
-    public List<String> getPresinedUrl(List<S3Object> objects) {
-        S3Presigner presigner = S3Presigner.create();
+    public List<String> getUrls(List<S3Object> objects) {
         List<String> urls = new ArrayList<>();
 
         for (S3Object obj : objects) {
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                    .bucket(BUCKET)
-                    .key(obj.key())
-                    .build();
-
-            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                    .getObjectRequest(getObjectRequest)
-                    .signatureDuration(Duration.ofMinutes(15)) // tempo de validade da URL
-                    .build();
-
-            URL url = presigner.presignGetObject(presignRequest).url();
-            urls.add(url.toString());
+            urls.add("https://" + BUCKET + ".s3.us-east-1.amazonaws.com/" + obj.key());
         }
 
         return urls;

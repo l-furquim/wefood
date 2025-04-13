@@ -1,0 +1,16 @@
+meta {
+  name: create restaurant
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8083/v1/api/restaurants
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  data: {"name": "Ultra restaurante","domainEmail": "fuaaauimmsw@gmail.com","password": "ishow123","cnpj": "11111111110000","address": "Rua silvia 1603","isMainAccount": true} @contentType(application/json)
+  image: @file(/home/furqas/Pictures/Screenshots/Screenshot from 2025-04-03 18-15-11.png)
+}

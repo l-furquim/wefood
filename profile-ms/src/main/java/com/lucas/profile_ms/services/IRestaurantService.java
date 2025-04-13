@@ -4,6 +4,7 @@ import com.lucas.profile_ms.domains.profile.dto.ConfirmCodeDto;
 import com.lucas.profile_ms.domains.restaurant.Restaurant;
 import com.lucas.profile_ms.domains.restaurant.dto.CreateRestaurantDto;
 import com.lucas.profile_ms.domains.restaurant.dto.DeleteRestaurantDto;
+import com.lucas.profile_ms.domains.restaurant.dto.GetRestaurantImagesDto;
 
 import java.util.List;
 
@@ -15,5 +16,6 @@ public interface IRestaurantService {
     Restaurant findById(Long id);
     List<Restaurant> getAll();
     List<Restaurant> getAllBranchAccounts(String domainEmail);
+    GetRestaurantImagesDto getRestaurantImages(Long id);
 
 }

@@ -4,6 +4,7 @@ import com.lucas.profile_ms.domains.profile.Profile;
 import com.lucas.profile_ms.domains.profile.dto.CreateProfileDto;
 import com.lucas.profile_ms.domains.restaurant.Restaurant;
 import com.lucas.profile_ms.domains.restaurant.dto.CreateRestaurantDto;
+import com.lucas.profile_ms.domains.restaurant.dto.CreateRestaurantMetadataDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,7 +30,11 @@ public interface IRestaurantController {
             @ApiResponse(responseCode = "401", description = "Um restaurante do tipo main ja existe com esse cnpj, ou ja foi enviado o pedido de confirmação da conta", content = @Content),
             @ApiResponse(responseCode = "500", description = "Erro não mapeado", content = @Content)
     })
-    public ResponseEntity<Restaurant> createConfirmation(@RequestBody CreateRestaurantDto data) throws Exception;
+    public ResponseEntity<Restaurant> createConfirmation(
+            @RequestPart CreateRestaurantMetadataDto data,
+            @RequestPart MultipartFile image
+
+    ) throws Exception;
 
     @Operation(summary = "Confirma a conta do restaurante a partir de um cdigo")
     @ApiResponses(value = {

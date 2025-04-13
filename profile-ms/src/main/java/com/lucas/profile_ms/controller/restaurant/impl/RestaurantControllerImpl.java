@@ -5,10 +5,13 @@ import com.lucas.profile_ms.controller.restaurant.IRestaurantController;
 import com.lucas.profile_ms.domains.profile.dto.ConfirmCodeDto;
 import com.lucas.profile_ms.domains.restaurant.Restaurant;
 import com.lucas.profile_ms.domains.restaurant.dto.CreateRestaurantDto;
+import com.lucas.profile_ms.domains.restaurant.dto.CreateRestaurantMetadataDto;
+import com.lucas.profile_ms.domains.restaurant.dto.GetRestaurantImagesDto;
 import com.lucas.profile_ms.services.IRestaurantService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,9 +27,15 @@ public class RestaurantControllerImpl implements IRestaurantController {
     }
 
     @PostMapping
-    public ResponseEntity<Restaurant> createConfirmation(@RequestBody CreateRestaurantDto data){
-        var restaurant = restaurantService.createConfirmation(data);
+    public ResponseEntity<Restaurant> createConfirmation(
+            @RequestPart CreateRestaurantMetadataDto data,
+            @RequestPart MultipartFile image
 
+    ){
+        var restaurant = restaurantService.createConfirmation(new CreateRestaurantDto(
+                data,
+                image
+        ));
         return ResponseEntity.status(201).body(restaurant);
     }
 
@@ -60,5 +69,12 @@ public class RestaurantControllerImpl implements IRestaurantController {
         }
 
         return ResponseEntity.ok().body(restaurant);
+    }
+
+    @GetMapping("/images/{id}")
+    public ResponseEntity<GetRestaurantImagesDto> getRestaurantImages(@PathVariable("id") Long id){
+        var urls = restaurantService.getRestaurantImages(id);
+
+        return ResponseEntity.ok().body(urls);
     }
 }

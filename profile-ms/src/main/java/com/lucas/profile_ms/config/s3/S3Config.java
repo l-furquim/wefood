@@ -1,4 +1,4 @@
-package com.lucas.pedido_ms.config.s3;
+package com.lucas.profile_ms.config.s3;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +16,5 @@ public class S3Config {
                 .credentialsProvider(ProfileCredentialsProvider.create())
                 .build();
     }
-
 
 }

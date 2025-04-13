@@ -1,11 +1,10 @@
 package com.lucas.profile_ms.domains.restaurant.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public record CreateRestaurantDto(
-        String name,
-        String domainEmail,
-        String password,
-        String cnpj,
-        String address,
-        Boolean isMainAccount
+        CreateRestaurantMetadataDto data,
+        MultipartFile image
 ) {
+
 }
