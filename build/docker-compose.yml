@@ -1,14 +1,4 @@
 services:
-  notification-ms:
-    build:
-      context: ../notification-ms
-      dockerfile: Dockerfile
-    container_name: wefood-notification
-    depends_on:
-      - discovery-ms
-    networks:
-      - wefood-network
-
   discovery-ms:
     build:
       context: ../discovery-ms
@@ -18,7 +8,31 @@ services:
       - "8084:8084"
     networks:
       - wefood-network
+
+  profile-ms:
+    build:
+      context: ../profile-ms
+      dockerfile: Dockerfile
+    container_name: wefood-profile
+    ports:
+      - "8083:8083"
+    depends_on:
+      - discovery-ms
+    networks:
+      - wefood-network
+
+  notification-ms:
+    build:
+      context: ../notification-ms
+      dockerfile: Dockerfile
+    container_name: wefood-notification
+    ports:
+      - "8082:8082"
+    depends_on:
+      - discovery-ms
+    networks:
+      - wefood-network
 networks:
   wefood-network:
-    driver: bridge
+    external: true
 
