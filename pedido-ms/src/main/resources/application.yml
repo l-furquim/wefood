@@ -24,12 +24,12 @@ spring:
   application:
     name: pedido-ms
   datasource:
-    url: jdbc:postgresql://localhost:5432/wefood
+    url: jdbc:postgresql://postgres:5432/wefood
     username: root
     password: root
     driver-class-name: org.postgresql.Driver
   redis:
-      host: localhost
+      host: redis
       port: 6379
   jpa:
     show-sql: false
@@ -41,4 +41,4 @@ spring:
 feign:
   client:
     profile:
-      url: http://localhost:8083/
+      url: http://profile-ms:8083/

@@ -29,7 +29,7 @@ public class SwaggerConfig {
         contact.setUrl("https://github.com/l-furquim");
 
         Info info = new Info()
-                .title("Ifood clone transaction microservice")
+                .title("Ifood clone profile microservice")
                 .version("1.0")
                 .description("Microservice for profile creation and security")
                 .contact(contact);
