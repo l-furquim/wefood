@@ -1,4 +1,5 @@
 services:
+
   discovery-ms:
     build:
       context: ../discovery-ms
@@ -6,6 +7,35 @@ services:
     container_name: wefood-discovery
     ports:
       - "8084:8084"
+    networks:
+      - wefood-network
+
+  gateway-ms:
+    build:
+      context: ../gateway-ms
+      dockerfile: Dockerfile
+    container_name: wefood-gateway
+    ports:
+      - "8086:8086"
+    networks:
+      - wefood-network
+
+  payment-ms:
+    build:
+      context: ../payment-ms
+      dockerfile: Dockerfile
+    container_name: wefood-payment
+    ports:
+      - "8081:8081"
+    networks:
+      - wefood-network
+  mailsender-ms:
+    build:
+      context: ../mailsender-ms
+      dockerfile: Dockerfile
+    container_name: wefood-mailsender
+    ports:
+      - "8085:8085"
     networks:
       - wefood-network
 
