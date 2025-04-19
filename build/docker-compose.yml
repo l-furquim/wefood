@@ -44,6 +44,9 @@ services:
       context: ../profile-ms
       dockerfile: Dockerfile
     container_name: wefood-profile
+    environment:
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
     ports:
       - "8083:8083"
     depends_on:
@@ -62,6 +65,21 @@ services:
       - discovery-ms
     networks:
       - wefood-network
+  pedido-ms:
+    build:
+      context: ../pedido-ms
+      dockerfile: Dockerfile
+    container_name: wefood-pedido
+    environment:
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery-ms
+    networks:
+      - wefood-network
+      
 networks:
   wefood-network:
     external: true
