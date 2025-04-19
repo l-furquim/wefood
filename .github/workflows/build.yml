@@ -1,0 +1,76 @@
+name: Build and Push Docker images to Docker hub
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push discovery ms
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          push: true
+          file: ./discovery-ms/Dockerfile
+          tags: furqas/wefood-discovery:latest
+
+      - name: Build and push gateway ms
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          push: true
+          file: ./gateway-ms/Dockerfile
+          tags: furqas/wefood-gateway:latest
+
+      - name: Build and push mailsender ms
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          push: true
+          file: ./mailsender-ms/Dockerfile
+          tags: furqas/wefood-mailsender:latest
+
+      - name: Build and push notification ms
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          push: true
+          file: ./notification-ms/Dockerfile
+          tags: furqas/wefood-notification:latest
+
+      - name: Build and push payment ms
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          push: true
+          file: ./payment-ms/Dockerfile
+          tags: furqas/wefood-payment:latest
+      
+      - name: Build and push pedido ms
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          push: true
+          file: ./pedido-ms/Dockerfile
+          tags: furqas/wefood-pedido:latest
+
+      - name: Build and push profile ms
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          push: true
+          file: ./profile-ms/Dockerfile
+          tags: furqas/wefood-profile:latest
