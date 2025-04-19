@@ -1,0 +1,31 @@
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8084/eureka/
+  instance:
+    prefer-ip-address: true
+server:
+  port: 8087
+spring:
+  cloud:
+    discovery:
+      enable: true
+    config:
+      enable: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wefood
+    username: root
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  application:
+    name: explore-ms
+

@@ -1,0 +1,11 @@
+meta {
+  name: get recent searches
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8087/v1/api/search/recent/
+  body: none
+  auth: inherit
+}

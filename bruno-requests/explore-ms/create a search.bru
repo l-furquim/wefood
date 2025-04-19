@@ -1,0 +1,18 @@
+meta {
+  name: create a search
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8087/v1/api/search
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "content":"Restaurante do papai doido",
+    "userId": "1902312903812321"
+  }
+}
