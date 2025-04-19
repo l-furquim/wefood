@@ -22,7 +22,7 @@ jobs:
       - name: Build and push discovery ms
         uses: docker/build-push-action@v3
         with:
-          context: ./
+          context: ./discovery-ms
           push: true
           file: ./discovery-ms/Dockerfile
           tags: furqas/wefood-discovery:latest
@@ -30,7 +30,7 @@ jobs:
       - name: Build and push gateway ms
         uses: docker/build-push-action@v3
         with:
-          context: ./
+          context: ./gateway-ms
           push: true
           file: ./gateway-ms/Dockerfile
           tags: furqas/wefood-gateway:latest
@@ -38,7 +38,7 @@ jobs:
       - name: Build and push mailsender ms
         uses: docker/build-push-action@v3
         with:
-          context: ./
+          context: ./mailsender-ms
           push: true
           file: ./mailsender-ms/Dockerfile
           tags: furqas/wefood-mailsender:latest
@@ -46,7 +46,7 @@ jobs:
       - name: Build and push notification ms
         uses: docker/build-push-action@v3
         with:
-          context: ./
+          context: ./notification-ms
           push: true
           file: ./notification-ms/Dockerfile
           tags: furqas/wefood-notification:latest
@@ -54,7 +54,7 @@ jobs:
       - name: Build and push payment ms
         uses: docker/build-push-action@v3
         with:
-          context: ./
+          context: ./payment-ms
           push: true
           file: ./payment-ms/Dockerfile
           tags: furqas/wefood-payment:latest
@@ -62,7 +62,7 @@ jobs:
       - name: Build and push pedido ms
         uses: docker/build-push-action@v3
         with:
-          context: ./
+          context: ./pedido-ms
           push: true
           file: ./pedido-ms/Dockerfile
           tags: furqas/wefood-pedido:latest
@@ -70,7 +70,7 @@ jobs:
       - name: Build and push profile ms
         uses: docker/build-push-action@v3
         with:
-          context: ./
+          context: ./profile-ms
           push: true
           file: ./profile-ms/Dockerfile
           tags: furqas/wefood-profile:latest
