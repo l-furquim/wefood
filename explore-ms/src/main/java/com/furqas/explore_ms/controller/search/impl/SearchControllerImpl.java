@@ -4,7 +4,7 @@ import com.furqas.explore_ms.controller.search.ISearchController;
 import com.furqas.explore_ms.domains.search.dto.GetAllUserSearchesDto;
 import com.furqas.explore_ms.domains.search.dto.GetRecentSearchesDto;
 import com.furqas.explore_ms.domains.search.dto.SearchRequestDto;
-import com.furqas.explore_ms.service.search.ISearchService;
+import com.furqas.explore_ms.service.ISearchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +19,7 @@ public class SearchControllerImpl implements ISearchController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createSearch(@RequestBody SearchRequestDto request){
+    public ResponseEntity<Void> search(@RequestBody SearchRequestDto request){
         service.createSearch(request);
 
         return ResponseEntity.ok().build();

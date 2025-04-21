@@ -1,5 +1,6 @@
-package com.furqas.explore_ms.service.search.impl;
+package com.furqas.explore_ms.service.impl;
 
+import com.furqas.explore_ms.domains.profileclient.dto.GetRestaurantByNameDto;
 import com.furqas.explore_ms.domains.search.Search;
 import com.furqas.explore_ms.domains.search.dto.*;
 import com.furqas.explore_ms.domains.search.enums.SearchCategory;
@@ -7,25 +8,38 @@ import com.furqas.explore_ms.domains.search.exceptions.InvalidSearchDeletion;
 import com.furqas.explore_ms.domains.search.exceptions.InvalidSearchRequest;
 import com.furqas.explore_ms.domains.search.exceptions.SearchNotFound;
 import com.furqas.explore_ms.repository.SearchRepository;
-import com.furqas.explore_ms.service.search.ISearchService;
+import com.furqas.explore_ms.service.IOrderItemClientService;
+import com.furqas.explore_ms.service.IRestaurantClientService;
+import com.furqas.explore_ms.service.ISearchService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class SearchServiceImpl implements ISearchService {
 
     private final SearchRepository searchRepository;
+    private final IRestaurantClientService restaurantClientService;
+    private final IOrderItemClientService orderItemClientService;
 
-    public SearchServiceImpl(SearchRepository searchRepository) {
+    public SearchServiceImpl
+            (
+            SearchRepository searchRepository,
+            IRestaurantClientService restaurantClientService,
+            IOrderItemClientService orderItemClientService
+    )
+    {
         this.searchRepository = searchRepository;
+        this.restaurantClientService = restaurantClientService;
+        this.orderItemClientService = orderItemClientService;
     }
 
     @Transactional
     @Override
-    public void createSearch(SearchRequestDto request) {
+    public SearchSomethingDto createSearch(SearchRequestDto request) {
         if
         (
             request.content() == null || request.content().isEmpty() || request.userId() == null ||
@@ -33,29 +47,52 @@ public class SearchServiceImpl implements ISearchService {
         ){
             throw new InvalidSearchRequest("Encountered invalid data for creating a request");
         }
+        new Thread(() -> {
+            var userRecentSearch = searchRepository.getByContentAndUserId(request.content(), request.userId());
 
-        var userRecentSearch = searchRepository.getByContentAndUserId(request.content(), request.userId());
+            if(userRecentSearch.isPresent()){
+                var search = userRecentSearch.get();
 
-        if(userRecentSearch.isPresent()){
-            var search = userRecentSearch.get();
+                search.setSearchedAt(
+                        LocalDateTime.now()
+                );
 
-            search.setSearchedAt(
-                    LocalDateTime.now()
-            );
+                searchRepository.save(search);
+
+                return;
+            }
+
+            var search = Search.builder()
+                    .content(request.content())
+                    .searchedAt(LocalDateTime.now())
+                    .userId(request.userId())
+                    .category(request.category() == null ? SearchCategory.NONE : request.category())
+                    .build();
 
             searchRepository.save(search);
+        }).start();
 
-            return;
+        List<GetRestaurantByNameDto> restaurantResponse = null;
+
+        if(request.category().equals(SearchCategory.RESTAURANT)){
         }
 
-        var search = Search.builder()
-                .content(request.content())
-                .searchedAt(LocalDateTime.now())
-                .userId(request.userId())
-                .category(request.category() == null ? SearchCategory.NONE : request.category())
-                .build();
+        var orderItem = orderItemClientService.getOrderItemByName(request.content());
 
-        searchRepository.save(search);
+        if(restaurantResponse != null){
+            return new SearchSomethingDto(
+                    restaurantResponse,
+                    orderItem
+            );
+        }
+
+        restaurantResponse = restaurantClientService.getRestaurantByName(request.content());
+
+        return new SearchSomethingDto(
+                restaurantResponse,
+                orderItem
+        );
+
     }
 
     @Override

@@ -28,4 +28,10 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   application:
     name: explore-ms
+feign:
+  client:
+    profile:
+      url: http://localhost:8083/v1/api/
+    orderItem:
+      url: http://localhost:8080/v1/api
 
