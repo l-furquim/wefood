@@ -2,12 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds') // ID configurado no Jenkins
-    }
-
-    triggers {
-        // Executa no push para main ou em PR se você configurar o GitHub Webhook corretamente
-        pollSCM('* * * * *') // ou remova se não quiser polling
+        DOCKERHUB_CREDENTIALS = credentials('wefood-jenkins-dockerhub')
     }
 
     stages {
