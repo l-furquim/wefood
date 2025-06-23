@@ -19,3 +19,7 @@ spring:
     config:
       uri: http://127.0.0.1:8889
       enabled: false
+api:
+  security:
+    token:
+      secret: "${JWT_SECRET:tomeiagua}"

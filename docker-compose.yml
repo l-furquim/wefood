@@ -1,4 +1,56 @@
 services:
+  #wefood-proxy: 
+  #  image: nginx
+  #  container_name: wefood-proxy
+  #  restart: unless-stopped
+  #  volumes:
+  #    - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #    - ./nginx/proxy.conf:/etc/nginx/conf.d/proxy.conf
+  #  ports:
+  #    - 80:80
+  #  networks:
+  #    - wefood-proxy-network
+  #    - wefood-network 
+  #  depends_on:
+  #  - wefood-discovery 
+#
+  #wefood-prometheus:
+  #  image: prom/prometheus:latest
+  #  container_name: wefood-prometheus
+  #  restart: unless-stopped
+  #  volumes:
+  #    - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #    - ./prometheus/prometheus_data:/prometheus
+  #  command:
+  #    - '--config.file=/etc/prometheus/prometheus.yml'
+  #    - '--storage.tsdb.path=/prometheus'
+  #    - '--web.console.libraries=/etc/prometheus/console_libraries'
+  #    - '--web.console.templates=/etc/prometheus/consoles'
+  #    - '--web.enable-lifecycle'
+  #  ports:
+  #    - 9090:9090
+  #  networks:
+  #    - wefood-monit-network
+  #    - wefood-network
+  #  depends_on:
+  #    - wefood-discovery
+  #  user: root
+#
+  #wefood-grafana: 
+  #  image: grafana/grafana
+  #  container_name: wefood-grafana 
+  #  volumes:
+  #    - ./grafana:/var/lib/grafana
+  #  restart: unless-stopped
+  #  ports:
+  #    - 3000:3000
+  #  networks:
+  #    - monit
+  #  depends_on:
+  #    - wefood-prometheus 
+  #  user: root
+
+
   redis:
     image: redis:latest
     container_name: wefood-redis
@@ -50,7 +102,95 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
     networks:
       - wefood-network
+  discovery-ms:
+    build:
+      context: ./discovery-ms
+      dockerfile: Dockerfile
+    container_name: wefood-discovery
+    environment:
+      JWT_SECRET: "${JWT_SECRET}"
+    depends_on:
+    - kafka
+    ports:
+      - "8084:8084"
+    networks:
+      - wefood-network
+
+  #gateway-ms:
+  #  build:
+  #    context: ./gateway-ms
+  #    dockerfile: Dockerfile
+  #  container_name: wefood-gateway
+  #  ports:
+  #    - "8086:8086"
+  #  networks:
+  #    - wefood-network
+
+  payment-ms:
+    build:
+      context: ./payment-ms
+      dockerfile: Dockerfile
+    container_name: wefood-payment
+    ports:
+      - "8081:8081"
+    networks:
+      - wefood-network
+  mailsender-ms:
+    build:
+      context: ./mailsender-ms
+      dockerfile: Dockerfile
+    container_name: wefood-mailsender
+    ports:
+      - "8085:8085"
+    networks:
+      - wefood-network
+
+  profile-ms:
+    build:
+      context: ./profile-ms
+      dockerfile: Dockerfile
+    container_name: wefood-profile
+    environment:
+      JWT_SECRET: "${JWT_SECRET}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+    ports:
+      - "8083:8083"
+    depends_on:
+      - discovery-ms
+    networks:
+      - wefood-network
+
+  notification-ms:
+    build:
+      context: ./notification-ms
+      dockerfile: Dockerfile
+    container_name: wefood-notification
+    ports:
+      - "8082:8082"
+    depends_on:
+      - discovery-ms
+    networks:
+      - wefood-network
+  pedido-ms:
+    build:
+      context: ./pedido-ms
+      dockerfile: Dockerfile
+    container_name: wefood-pedido
+    environment:
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery-ms
+    networks:
+      - wefood-network
+ 
 networks:
+  wefood-proxy-network:
+    name: wefood-proxy-network
+    driver: bridge
   wefood-network:
     name: wefood-network
     driver: bridge

@@ -1,0 +1,42 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: wefood-profile
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['wefood-profile:8083']
+
+  - job_name: wefood-notification
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['wefood-notification:8082']
+
+  - job_name: wefood-pedido
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['wefood-pedido:8080']
+
+  - job_name: wefood-payment
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['wefood-payment:8081']
+
+  - job_name: wefood-mailsender
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['wefood-mailsender:8085']
+
+  - job_name: wefood-gateway
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['wefood-gateway:8086']
+
+  - job_name: wefood-discovery
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['wefood-discovery:8084']

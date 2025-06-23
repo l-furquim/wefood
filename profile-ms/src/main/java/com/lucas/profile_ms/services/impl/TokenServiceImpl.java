@@ -19,7 +19,7 @@ import java.time.ZoneOffset;
 public class TokenServiceImpl implements ITokenService {
 
     @Value("${api.security.token.secret}")
-    private static final String SECRET = "tomei-agua-hoje";
+    private String SECRET;
 
     @Override
     public String generateToken(Profile profile) {

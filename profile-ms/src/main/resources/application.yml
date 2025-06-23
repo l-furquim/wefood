@@ -35,3 +35,7 @@ spring:
       properties:
         hibernate:
           dialect: org.hibernate.dialect.PostgreSQLDialect
+api:
+  security:
+    token:
+      secret: "${JWT_SECRET:tomeiagua}"
