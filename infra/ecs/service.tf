@@ -6,9 +6,15 @@ resource "aws_ecs_service" "ecs_service" {
   desired_count   = 1
 
   network_configuration {
-    subnets          = [aws_subnet.public1.id]
-    security_groups  = [aws_security_group.fargate_sg.id]
+    subnets          = [aws_subnet.public[*].id]
+    security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
+  }
+
+  load_balancer {
+    container_name = "wefood-gateway"
+    container_port = 8086
+    target_group_arn = aws_lb_target_group.gateway_tag.arn
   }
 
   #depends_on = [aws_lb_listener.http]
